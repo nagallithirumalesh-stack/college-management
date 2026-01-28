@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Student</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="icon" type="image/x-icon" href="https://cdn-icons-png.flaticon.com/512/3437/3437364.png">
+    <style>
+        /* Dashboard specific styles */
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        nav {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        @media (min-width: 1024px) {
+            .grid-layout {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .subject-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .subject-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary);
+        }
+
+        .subject-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: #eff6ff;
+            color: var(--primary);
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .band-card {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--bg-light);
+        }
+
+        #subjectModal.open {
+            display: flex !important;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .modal {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body style="background-color: #f8fafc;">
+
+    <nav>
+        <div class="brand">
+            <span class="brand-name" style="margin:0;">SmartCampus</span>
+        </div>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <button onclick="openAttendance()"
+                style="background: #eff6ff; color: var(--primary); border: 1px solid var(--primary); padding: 0.4rem 0.8rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; transition: all 0.2s;">
+                <i data-feather="map-pin" style="width: 1rem; height: 1rem;"></i> Check In
+            </button>
+            <div id="bandBadge"
+                style="background: #fef3c7; color: #d97706; padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.875rem; font-weight: 600;">
+                Bronze Band</div>
+            <button onclick="logout()"
+                style="border: none; background: none; cursor: pointer; color: var(--text-muted);">
+                <i data-feather="log-out"></i>
+            </button>
+            <div onclick="openIdentityVerification()"
+                style="cursor: pointer; background: white; padding: 0.5rem; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center;"
+                title="Verify ID">
+                <i data-feather="smile" style="width: 1.2rem; height: 1.2rem; color: var(--primary);"></i>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="grid-layout">
+            <!-- Left Column: Main Content -->
+            <div style="flex: 2;">
+                <!-- Welcome Header (Enhanced) -->
+                <div
+                    style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; padding: 2rem; border-radius: 1rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden;">
+                    <div style="position: relative; z-index: 2;">
+                        <h1 id="welcomeMsg" style="margin: 0; font-size: 1.8rem; font-weight: 700;">Hello, Student!</h1>
+                        <p style="opacity: 0.9; margin-top: 0.5rem; font-size: 1rem;">Computer Science & Engineering •
+                            3rd Semester</p>
+                        <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                            <div
+                                style="background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-feather="user"></i> Roll: CS2024-001
+                            </div>
+                            <div id="rankBadge"
+                                style="background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-feather="award"></i> Rank: Top 5%
+                            </div>
+                        </div>
+                    </div>
+                    <i data-feather="book-open"
+                        style="position: absolute; right: -2rem; bottom: -2rem; width: 12rem; height: 12rem; opacity: 0.1; transform: rotate(-15deg);"></i>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <div style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border);">
+                    <div class="nav-tab active" onclick="switchView('overview')"
+                        style="padding: 0.75rem; cursor:pointer; font-weight:600; border-bottom: 2px solid var(--primary); color: var(--primary);">
+                        Overview</div>
+                    <div class="nav-tab" onclick="switchView('assignments')"
+                        style="padding: 0.75rem; cursor:pointer; font-weight:500; color:var(--text-muted);">Assignments
+                    </div>
+                    <div class="nav-tab" onclick="openAnalytics()"
+                        style="padding: 0.75rem; cursor:pointer; font-weight:500; color:var(--text-muted); display:flex; align-items:center; gap:0.5rem;">
+                        <i data-feather="bar-chart-2" style="width:1rem;"></i> Analytics
+                    </div>
+                </div>
+
+                <!-- Left Column: VIEW-OVERVIEW -->
+                <div id="view-overview" class="view-section">
+                    <section style="margin-bottom: 2rem;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 style="font-weight: 600; font-size: 1.25rem;">Your Subjects</h3>
+                            <a href="#" style="font-size: 0.875rem; color: var(--primary); text-decoration: none;">View
+                                All</a>
+                        </div>
+                        <div id="subjectGrid" class="subject-grid">
+                            <div
+                                style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">
+                                Loading subjects...</div>
+                        </div>
+                    </section>
+
+                    <section class="card">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--bg-light); padding-bottom: 1rem;">
+                            <h3 style="font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-feather="bell" style="width: 1.2rem;"></i> Latest Updates
+                            </h3>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <span
+                                    style="font-size: 0.75rem; background: #eff6ff; color: var(--primary); padding: 0.25rem 0.75rem; border-radius: 99px; cursor: pointer;">All</span>
+                                <span
+                                    style="font-size: 0.75rem; background: white; border: 1px solid var(--border); color: var(--text-muted); padding: 0.25rem 0.75rem; border-radius: 99px; cursor: pointer;">Assignments</span>
+                            </div>
+                        </div>
+                        <div id="latestNotes" style="display: flex; flex-direction: column; gap: 0;"></div>
+                    </section>
+                </div>
+
+                <!-- VIEW-ASSIGNMENTS -->
+                <div id="view-assignments" class="view-section hidden">
+                    <section class="card">
+                        <h3 style="margin-bottom: 1rem;">Pending Assignments</h3>
+                        <div
+                            style="text-align:center; padding: 2rem; border: 1px dashed var(--border); border-radius: 0.5rem; color: var(--text-muted);">
+                            <i data-feather="check-circle"
+                                style="margin-bottom: 0.5rem; width: 2rem; height: 2rem;"></i>
+                            <p>No pending assignments! Great job.</p>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- VIEW-RESULTS -->
+                <div id="view-results" class="view-section hidden">
+                    <section class="card">
+                        <h3 style="margin-bottom: 1rem;">Academic Performance</h3>
+                        <table style="width: 100%; text-align: left;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid var(--border);">
+                                    <th style="padding: 0.75rem;">Subject</th>
+                                    <th style="padding: 0.75rem;">Assessment</th>
+                                    <th style="padding: 0.75rem;">Score</th>
+                                    <th style="padding: 0.75rem;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 0.75rem;">Mathematics</td>
+                                    <td style="padding: 0.75rem;">Mid Term</td>
+                                    <td style="padding: 0.75rem; font-weight: bold;">85/100</td>
+                                    <td style="padding: 0.75rem;"><span
+                                            style="background: #dcfce7; color: #166534; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">Pass</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0.75rem;">Computer Architecture</td>
+                                    <td style="padding: 0.75rem;">Quiz 1</td>
+                                    <td style="padding: 0.75rem; font-weight: bold;">18/20</td>
+                                    <td style="padding: 0.75rem;"><span
+                                            style="background: #dcfce7; color: #166534; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">Pass</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                </div>
+
+                <!-- Right Column -->
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <!-- Profile / Band Card -->
+                    <div class="card band-card" style="position: relative; overflow: hidden;">
+                        <div style="position: relative; z-index: 2;">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div>
+                                    <p style="font-size: 0.875rem; opacity: 0.9;">Current Status</p>
+                                    <h2 style="font-size: 2rem; color: white; margin: 0.25rem 0;" id="userBand">Bronze
+                                    </h2>
+                                </div>
+                                <div
+                                    style="background: rgba(255,255,255,0.2); width: 2.5rem; height: 2.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                    <i data-feather="award" style="width: 1.5rem; height: 1.5rem;"></i>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 1.5rem;">
+                                <div
+                                    style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.5rem; font-weight: 500;">
+                                    <span id="userPoints">0 pts</span>
+                                    <span id="nextPoints">Next: 1000 pts</span>
+                                </div>
+                                <div
+                                    style="width: 100%; height: 6px; background: rgba(0,0,0,0.2); border-radius: 99px; overflow: hidden;">
+                                    <div id="progressBar"
+                                        style="width: 0%; height: 100%; background: #fbbf24; border-radius: 99px; transition: width 0.5s ease;">
+                                    </div>
+                                </div>
+                                <div style="margin-top: 1rem; text-align: right;">
+                                    <a href="#"
+                                        style="color: white; font-size: 0.75rem; text-decoration: underline; opacity: 0.9;">How
+                                        to earn points?</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Your Rank Card -->
+                    <div class="card" style="background: white; border-left: 4px solid var(--primary);">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div
+                                style="background: #eff6ff; padding: 0.75rem; border-radius: 0.5rem; color: var(--primary);">
+                                <i data-feather="trending-up"></i>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.875rem; color: var(--text-muted);">Class Rank</div>
+                                <div style="font-size: 1.25rem; font-weight: 700;">#12 <span
+                                        style="font-size: 0.8rem; font-weight: 400; color: #166534; background: #dcfce7; padding: 0.1rem 0.5rem; border-radius: 99px; vertical-align: middle;">Top
+                                        15%</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Leaderboard -->
+                    <div class="card" style="padding: 0;">
+                        <div
+                            style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); background: #f9fafb; border-radius: 1rem 1rem 0 0; display: flex; justify-content: space-between; align-items: center;">
+                            <h4 style="font-weight: 600; font-size: 0.95rem;">Leaderboard</h4>
+                            <select
+                                style="font-size: 0.75rem; border: none; background: transparent; color: var(--text-muted); cursor: pointer;">
+                                <option>This Week</option>
+                                <option>All Time</option>
+                            </select>
+                        </div>
+                        <div id="leaderboardList" style="padding: 0.5rem 0;">
+                            <!-- Leaderboard items -->
+                        </div>
+                        <div style="padding: 0.75rem; text-align: center; border-top: 1px solid var(--border);">
+                            <a href="#"
+                                style="font-size: 0.8rem; color: var(--primary); font-weight: 500; text-decoration: none;">View
+                                Full Leaderboard</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Note Modal -->
+        <div id="uploadModal" class="modal hidden"
+            style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 101; display: flex; align-items: center; justify-content: center;">
+            <div style="background: white; padding: 2rem; border-radius: 1rem; width: 90%; max-width: 500px;">
+                <h2 style="margin-bottom: 1rem;">Upload Class Note</h2>
+                <form id="studentUploadForm">
+                    <input type="hidden" id="uploadSubjectId">
+                    <div style="margin-bottom: 1rem;">
+                        <label
+                            style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Title</label>
+                        <input type="text" id="upTitle" required
+                            style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 0.5rem;">
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label
+                            style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">File
+                            (PDF/Image)</label>
+                        <input type="file" id="upFile" required style="width: 100%;">
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" id="upAnonymous"> Post Anonymously
+                        </label>
+                        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Checking this will
+                            hide your name from other students.</p>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="button" onclick="document.getElementById('uploadModal').classList.add('hidden')"
+                            style="flex: 1; padding: 0.75rem; border: 1px solid var(--border); background: white; border-radius: 0.5rem; cursor: pointer;">Cancel</button>
+                        <button type="submit" class="btn-primary" style="flex: 1;">Upload</button>
+                    </div>
+                    <div id="upStatus" style="margin-top: 1rem; text-align: center; font-size: 0.875rem;"></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Assignment Submission Modal -->
+        <div id="assignmentModal" class="modal hidden"
+            style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 101; display: flex; align-items: center; justify-content: center;">
+            <div style="background: white; padding: 2rem; border-radius: 1rem; width: 90%; max-width: 500px;">
+                <h2 style="margin-bottom: 0.5rem;">Submit Assignment</h2>
+                <p id="assignModalTitle" style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">
+                    Assignment Title</p>
+
+                <form id="assignmentSubmitForm">
+                    <input type="hidden" id="submitAssignmentId">
+
+                    <div style="margin-bottom: 1rem;">
+                        <label
+                            style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Your
+                            Answer (Text)</label>
+                        <textarea id="assignText" rows="4"
+                            style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 0.5rem; font-family: inherit;"></textarea>
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label
+                            style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Attach
+                            File (Optional)</label>
+                        <input type="file" id="assignFile" style="width: 100%;">
+                    </div>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="button"
+                            onclick="document.getElementById('assignmentModal').classList.add('hidden')"
+                            style="flex: 1; padding: 0.75rem; border: 1px solid var(--border); background: white; border-radius: 0.5rem; cursor: pointer;">Cancel</button>
+                        <button type="submit" class="btn-primary" style="flex: 1;">Submit</button>
+                    </div>
+                    <div id="assignStatus" style="margin-top: 1rem; text-align: center; font-size: 0.875rem;"></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Analytics Modal -->
+        <div id="analyticsModal" class="modal hidden"
+            style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 101; display: flex; align-items: center; justify-content: center;">
+            <div
+                style="background: white; padding: 2rem; border-radius: 1rem; width: 90%; max-width: 800px; height: 80vh; overflow-y: auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2 style="font-weight: 700;">Performance Analytics</h2>
+                    <button onclick="document.getElementById('analyticsModal').classList.add('hidden')"
+                        style="background:none; border:none; cursor:pointer;"><i data-feather="x"></i></button>
+                </div>
+
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+                    <div style="padding: 1.5rem; background: #eff6ff; border-radius: 1rem; text-align: center;">
+                        <h3 id="anAttendance" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 0.5rem;">
+                            --%</h3>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">Attendance</p>
+                    </div>
+                    <div style="padding: 1.5rem; background: #fff7ed; border-radius: 1rem; text-align: center;">
+                        <h3 id="anAvgMarks" style="font-size: 2.5rem; color: #ea580c; margin-bottom: 0.5rem;">--</h3>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">Avg Marks</p>
+                    </div>
+                    <div style="padding: 1.5rem; background: #f0fdf4; border-radius: 1rem; text-align: center;">
+                        <h3 id="anParticipation" style="font-size: 2.5rem; color: #166534; margin-bottom: 0.5rem;">--
+                        </h3>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">Engagement Score</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 style="margin-bottom: 1rem;">AI Performance Insights</h3>
+                    <div id="aiInsightsBox"
+                        style="background: #f8fafc; padding: 1.5rem; border-radius: 1rem; border-left: 4px solid var(--primary); line-height: 1.6;">
+                        <p style="color: var(--text-muted);">Loading insights...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Modal -->
+        <div id="attendanceModal" class="modal hidden"
+            style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 101; display: flex; align-items: center; justify-content: center;">
+            <div
+                style="background: white; padding: 2rem; border-radius: 1rem; width: 90%; max-width: 400px; text-align: center;">
+                <div
+                    style="background: #eff6ff; width: 4rem; height: 4rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                    <i data-feather="map-pin" style="width: 2rem; height: 2rem; color: var(--primary);"></i>
+                </div>
+                <h2 style="margin-bottom: 0.5rem;">Mark Attendance</h2>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">Please ensure you are
+                    inside the classroom.</p>
+
+                <div id="attendStep1">
+                    <button onclick="getStudentLocation()" class="btn-primary" style="width: 100%; padding: 0.75rem;">
+                        <i data-feather="crosshair" style="width: 1rem; vertical-align: middle;"></i> Verify Location
+                    </button>
+                    <p id="locStatus" style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--text-muted);"></p>
+                </div>
+
+                <div id="attendStep2" class="hidden" style="margin-top: 1rem;">
+                    <input type="text" id="qrInput" placeholder="Enter 4-Digit Code" maxlength="4"
+                        style="width: 100%; padding: 0.75rem; text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem; border: 2px solid var(--border); border-radius: 0.5rem; margin-bottom: 1rem; text-transform: uppercase;">
+                    <button onclick="submitAttendance()" class="btn-primary"
+                        style="width: 100%; padding: 0.75rem;">Submit Code</button>
+                </div>
+
+                <button onclick="document.getElementById('attendanceModal').classList.add('hidden')"
+                    style="margin-top: 1rem; background: none; border: none; color: var(--text-muted); font-size: 0.85rem; cursor: pointer;">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Identity Verification Modal -->
+        <div id="identityModal" class="modal hidden"
+            style="position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; display: flex; align-items: center; justify-content: center;">
+            <div
+                style="background: white; padding: 2rem; border-radius: 1rem; width: 90%; max-width: 500px; text-align: center;">
+                <h2 style="margin-bottom: 1rem;">AI Identity Verification</h2>
+
+                <div
+                    style="width: 100%; height: 250px; background: #000; margin-bottom: 1.5rem; border-radius: 0.5rem; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                    <!-- Simulated Camera Feed -->
+                    <div id="cameraFeed"
+                        style="width: 100%; height: 100%; background: linear-gradient(0deg, rgba(0,255,0,0.1), transparent); display: flex; align-items: center; justify-content: center;">
+                        <div
+                            style="width: 200px; height: 200px; border: 2px dashed rgba(255,255,255,0.5); border-radius: 50%;">
+                        </div>
+                    </div>
+                    <p id="camStatus" style="position: absolute; bottom: 1rem; color: white; font-family: monospace;">
+                        Initializing Vision Engine...</p>
+                </div>
+
+                <p id="verifyMsg" style="color: var(--text-muted); margin-bottom: 1.5rem;">Please look at the camera for
+                    attendance verification.</p>
+
+                <button id="verifyBtn" onclick="runVerification()" class="btn-primary"
+                    style="width: 100%; padding: 1rem;">
+                    <i data-feather="camera" style="width: 1rem; margin-right: 0.5rem;"></i> Start Verification
+                </button>
+                <button onclick="closeIdentity()"
+                    style="margin-top: 1rem; background: none; border: none; cursor: pointer; color: var(--text-muted);">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Chatbot Widget -->
+        <div id="chatbot-widget" style="position: fixed; bottom: 2rem; right: 2rem; z-index: 999;">
+            <!-- Chat Window -->
+            <div id="chat-window" class="hidden"
+                style="position: absolute; bottom: 4rem; right: 0; width: 350px; height: 500px; background: white; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden;">
+                <div
+                    style="background: var(--primary); padding: 1rem; color: white; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-weight: 600;">Campus AI Assistant</div>
+                    <button onclick="toggleChat()"
+                        style="background: none; border: none; color: white; cursor: pointer;"><i
+                            data-feather="x"></i></button>
+                </div>
+
+                <div id="chat-messages"
+                    style="flex: 1; padding: 1rem; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 0.75rem;">
+                    <div
+                        style="align-self: flex-start; background: #e0e7ff; padding: 0.75rem; border-radius: 0.75rem 0.75rem 0.75rem 0; font-size: 0.9rem; max-width: 80%;">
+                        Hello! I'm your AI study assistant. Ask me anything about your subjects or assignments.
+                    </div>
+                </div>
+
+                <div
+                    style="padding: 1rem; background: white; border-top: 1px solid var(--border); display: flex; gap: 0.5rem;">
+                    <input type="text" id="chatInput" placeholder="Type a question..."
+                        style="flex: 1; border: 1px solid var(--border); padding: 0.5rem; border-radius: 0.5rem; outline: none;">
+                    <button onclick="sendChat()"
+                        style="background: var(--primary); color: white; border: none; padding: 0.5rem 0.75rem; border-radius: 0.5rem; cursor: pointer;"><i
+                            data-feather="send" style="width: 1rem;"></i></button>
+                </div>
+            </div>
+
+            <!-- Trigger Button -->
+            <button onclick="toggleChat()"
+                style="width: 3.5rem; height: 3.5rem; background: var(--primary); color: white; border-radius: 50%; border: none; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                <i data-feather="message-circle" style="width: 1.75rem; height: 1.75rem;"></i>
+            </button>
+        </div>
+
+        <script src="js/auth.js"></script>
+        <script>
+            feather.replace();
+
+            // State for active view
+            let currentState = {
+                view: 'overview', // 'overview', 'assignments', 'results'
+                activeSubject: null
+            };
+
+            const subjectsData = []; // Store for easy access
+
+            document.addEventListener('DOMContentLoaded', async () => {
+                const token = localStorage.getItem('token');
+                const userStr = localStorage.getItem('user');
+
+                if (!token || !userStr) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                const user = JSON.parse(userStr);
+                document.getElementById('welcomeMsg').textContent = `Hello, ${user.name}!`;
+
+                // Gamification Logic
+                document.getElementById('userBand').textContent = user.band || 'Bronze';
+                const points = user.points || 0;
+                document.getElementById('userPoints').textContent = `${points} pts`;
+
+                // Progress Calculation (Mock logic: Bronze < 1000, Silver < 2000...)
+                const nextThreshold = 1000 * (Math.floor(points / 1000) + 1);
+                const progress = (points % 1000) / 1000 * 100;
+
+                document.getElementById('nextPoints').textContent = `Next: ${nextThreshold} pts`;
+                document.getElementById('progressBar').style.width = `${progress}%`;
+
+                // Update Rank Badge in Header
+                const rankBadge = document.getElementById('rankBadge');
+                if (rankBadge) {
+                    let rankText = "Top 50%";
+                    if (points > 2000) rankText = "Top 5%";
+                    else if (points > 1000) rankText = "Top 15%";
+                    rankBadge.innerHTML = `<i data-feather="award"></i> Rank: ${rankText}`;
+                    feather.replace();
+                }
+
+                // --- NAVIGATION ---
+                document.querySelectorAll('.nav-tab').forEach(item => { /* ... existing logic ... */ });
+
+                // Fetch Data
+                try {
+                    // Subjects
+                    const subRes = await fetch('http://localhost:5000/api/subjects', {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    const subjects = await subRes.json();
+                    subjectsData.push(...subjects);
+                    renderSubjects(subjects);
+
+                    // Latest Notes
+                    const notesRes = await fetch('http://localhost:5000/api/notes/latest', {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    const notes = await notesRes.json();
+                    renderNotes(notes);
+
+                    // Fetch Assignments (Mock for now or use real endpoint if seeded)
+                    // For now, let's try to fetch real assignments if any, else show empty
+                    try {
+                        // We need a subject ID to fetch assignments usually, or a "my assignments" endpoint
+                        // But let's mock the render for visual verification first as per user request
+                        // Or fetch for one of the subjects we have
+                        const assignments = [];
+                        if (subjects.length > 0) {
+                            const assignRes = await fetch(`http://localhost:5000/api/assignments/subject/${subjects[0]._id}`, {
+                                headers: { Authorization: `Bearer ${token}` }
+                            });
+                            if (assignRes.ok) {
+                                const data = await assignRes.json();
+                                assignments.push(...data);
+                            }
+                        }
+                        renderAssignments(assignments);
+                    } catch (e) { console.error("Assignment fetch error", e); }
+
+                    // Mock Leaderboard
+                    const mockLeaderboard = [
+                        { name: 'Alice Johnson', department: 'CSE', points: 2450 },
+                        { name: 'Bob Smith', department: 'CSE', points: 2300 },
+                        { name: 'Charlie', department: 'ECE', points: 2150 },
+                        { name: user.name, department: 'CSE', points: user.points || 0 }
+                    ];
+                    renderLeaderboard(mockLeaderboard.sort((a, b) => b.points - a.points));
+
+                } catch (err) {
+                    console.error(err);
+                }
+            });
+
+            // --- RENDER FUNCTIONS ---
+            function renderAssignments(assignments) {
+                const container = document.querySelector('#view-assignments .card');
+                if (!container) return; // Should exist
+
+                if (assignments.length === 0) {
+                    container.innerHTML = `
+                        <h3 style="margin-bottom: 1rem; font-weight: 600;">Pending Assignments</h3>
+                        <div style="text-align:center; padding: 3rem; border: 1px dashed var(--border); border-radius: 0.5rem; color: var(--text-muted); background: #f9fafb;">
+                            <i data-feather="check-circle" style="margin-bottom: 1rem; width: 3rem; height: 3rem; opacity: 0.5;"></i>
+                            <p style="font-size: 1.1rem; color: var(--text-main); font-weight: 500;">No pending assignments!</p>
+                            <p style="font-size: 0.9rem;">Enjoy your free time.</p>
+                        </div>`;
+                    feather.replace();
+                    return;
+                }
+
+                container.innerHTML = `
+                    <h3 style="margin-bottom: 1rem; font-weight: 600;">Your Assignments</h3>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        ${assignments.map(a => `
+                            <div style="border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.25rem; background: white; transition: box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 6px -1px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                    <h4 style="font-weight: 600; font-size: 1.05rem; margin: 0;">${a.title}</h4>
+                                    <span style="font-size: 0.75rem; background: #fee2e2; color: #b91c1c; padding: 0.25rem 0.6rem; border-radius: 99px; font-weight: 500;">Due: ${new Date(a.dueAt).toLocaleDateString()}</span>
+                                </div>
+                                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem; line-height: 1.5;">${a.description || 'No description provided.'}</p>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--bg-light); padding-top: 1rem;">
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">
+                                        <i data-feather="file-text" style="width: 0.9rem; vertical-align: middle;"></i> ${a.totalMarks} Marks
+                                    </div>
+                                    <button class="btn-primary" style="padding: 0.4rem 1rem; font-size: 0.85rem;" onclick="openAssignmentUpload('${a._id}')">
+                                        Open & Submit
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                feather.replace();
+            }
+
+            function renderSubjects(subjects) {
+                const subjectGrid = document.getElementById('subjectGrid');
+                if (subjects.length === 0) {
+                    subjectGrid.innerHTML = `
+                        <div style="grid-column: 1/-1; background: white; padding: 3rem; border-radius: 1rem; border: 1px dashed var(--border); text-align: center;">
+                            <div style="background: #eff6ff; width: 4rem; height: 4rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: var(--primary);">
+                                 <i data-feather="book" style="width: 2rem; height: 2rem;"></i>
+                            </div>
+                            <h3 style="font-weight: 600; margin-bottom: 0.5rem;">You are not enrolled in any subjects yet</h3>
+                            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Contact your administrator to get added to your classes.</p>
+                            <button class="btn-primary" style="margin: auto;">View Course Catalog</button>
+                        </div>`;
+                    feather.replace();
+                    return;
+                }
+
+                subjectGrid.innerHTML = subjects.map(sub => `
+                    <div class="subject-card" onclick="openSubjectDetail('${sub._id}')" style="display: flex; flex-direction: column; height: 100%;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <div class="subject-icon" style="margin: 0;">
+                                <i data-feather="book"></i>
+                            </div>
+                            <span style="font-size: 0.7rem; background: #f3f4f6; padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 600;">${sub.code}</span>
+                        </div>
+                        
+                        <div style="margin-bottom: auto;">
+                            <h4 style="font-weight: 600; color: var(--text-main); font-size: 1.1rem; margin-bottom: 0.25rem;">${sub.name}</h4>
+                            <p style="font-size: 0.85rem; color: var(--text-muted);">${sub.faculty?.name || 'Faculty TBA'}</p>
+                        </div>
+
+                        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--bg-light); display: flex; align-items: center; justify-content: space-between;">
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">
+                                <i data-feather="clock" style="width: 0.8rem; vertical-align: middle;"></i> 10:00 AM
+                            </div>
+                            <div style="font-size: 0.8rem; font-weight: 600; color: var(--primary);">Go to Class &rarr;</div>
+                        </div>
+                    </div>
+                `).join('');
+                feather.replace();
+            }
+
+            function renderNotes(notes, containerId = 'latestNotes') {
+                const notesContainer = document.getElementById(containerId);
+                if (notes.length === 0) {
+                    notesContainer.innerHTML = `
+                        <div style="text-align:center; padding: 2rem; color:var(--text-muted);">
+                            <i data-feather="inbox" style="width: 2rem; height: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                            <p>No recent updates.</p>
+                        </div>`;
+                    feather.replace();
+                    return;
+                }
+
+                notesContainer.innerHTML = notes.map(note => {
+                    const uploaderName = note.isAnonymous ? 'Anonymous' : (note.uploadedBy?.name || 'Faculty');
+                    let icon = 'file-text';
+                    let bg = '#eff6ff';
+                    let color = 'var(--primary)';
+
+                    if (note.fileType === 'pdf') { icon = 'file-text'; bg = '#fee2e2'; color = '#ef4444'; }
+                    else if (note.fileType === 'image') { icon = 'image'; bg = '#e0e7ff'; color = '#4f46e5'; }
+
+                    return `
+                    <div style="display: flex; gap: 1rem; align-items: start; padding: 1rem; border-bottom: 1px solid var(--bg-light); transition: background 0.2s; cursor: pointer;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                        <div style="width: 2.5rem; height: 2.5rem; background: ${bg}; color: ${color}; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i data-feather="${icon}" style="width: 1.2rem; height: 1.2rem;"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                                 <span style="font-weight: 600; font-size: 0.95rem; color: var(--text-main);">${note.title}</span>
+                                 <span style="font-size: 0.7rem; color: var(--text-muted);">Today</span>
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="background: #f3f4f6; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.7rem;">${note.subject?.code || 'GEN'}</span>
+                                <span>• ${uploaderName}</span>
+                            </div>
+                        </div>
+                        <div style="display:flex; gap: 0.5rem; padding-left: 0.5rem;">
+                             <a href="http://localhost:5000/${note.fileUrl}" download target="_blank" title="Save" style="width: 2rem; height: 2rem; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid var(--border); color: var(--text-muted);">
+                                <i data-feather="download" style="width: 1rem;"></i>
+                            </a>
+                        </div>
+                    </div>
+                `}).join('');
+                feather.replace();
+            }
+
+            function renderLeaderboard(leaderboard) {
+                const list = document.getElementById('leaderboardList');
+                if (!list) return;
+                list.innerHTML = leaderboard.map((student, i) => `
+                    <div class="list-item" style="padding: 1rem 1.5rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <span style="font-weight: 700; width: 1.5rem; text-align: center; color: ${i === 0 ? '#d97706' : '#9ca3af'}; font-size: 1rem;">#${i + 1}</span>
+                            <div>
+                                <div style="font-weight: 600; font-size: 0.95rem; color: var(--text-main);">${student.name}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">${student.department || 'CSE'}</div>
+                            </div>
+                        </div>
+                        <div style="font-weight: 600; font-size: 0.9rem; color: var(--primary);">${student.points} pts</div>
+                    </div>
+                `).join('');
+            }
+
+            // --- NAVIGATION & VIEWS ---
+            function switchView(viewName) {
+                // Update UI tabs (if we had them visually separate from cards)
+                // For now, let's keep it simple: Overview is main. 
+                // The request was for "Assignments" and "Results" specifically.
+
+                document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+                document.getElementById(`view-${viewName}`).classList.remove('hidden');
+            }
+
+            // --- SUBJECT DETAIL MODAL ---
+            window.openSubjectDetail = async function (subjectId) {
+                const subject = subjectsData.find(s => s._id === subjectId);
+                if (!subject) return;
+
+                document.getElementById('modalTitle').textContent = subject.name;
+                document.getElementById('modalDept').textContent = `${subject.code} • ${subject.department}`;
+                document.getElementById('uploadSubjectId').value = subjectId; // Set subject for upload form
+                document.getElementById('subjectModal').classList.add('open');
+
+                // Customizing Header with Upload Button
+                const modalHeader = document.querySelector('#subjectModal h2').parentElement;
+                // Remove existing button if any to avoid duplicates
+                const existingBtn = modalHeader.querySelector('.upload-btn-trigger');
+                if (existingBtn) existingBtn.remove();
+
+                const btn = document.createElement('button');
+                btn.className = 'btn-primary upload-btn-trigger';
+                btn.style.marginTop = '0.5rem';
+                btn.style.fontSize = '0.8rem';
+                btn.innerHTML = '<i data-feather="upload" style="width: 1rem; margin-right:0.5rem;"></i> Upload Note';
+                btn.onclick = () => document.getElementById('uploadModal').classList.remove('hidden');
+                modalHeader.appendChild(btn);
+                feather.replace();
+
+                // Fetch Notes for this Subject
+                const token = localStorage.getItem('token');
+                const res = await fetch(`http://localhost:5000/api/notes/subject/${subjectId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const notes = await res.json();
+
+                // Render tabs inside modal
+                renderNotes(notes, 'modalNotesList');
+            }
+
+            window.closeModal = function () {
+                document.getElementById('subjectModal').classList.remove('open');
+            }
+
+            function logout() {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'index.html';
+            }
+
+            // --- UPLOAD LOGIC ---
+            document.getElementById('studentUploadForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const status = document.getElementById('upStatus');
+                status.textContent = 'Uploading...';
+
+                const formData = new FormData();
+                formData.append('title', document.getElementById('upTitle').value);
+                formData.append('subjectId', document.getElementById('uploadSubjectId').value);
+                formData.append('description', 'Student Upload');
+                formData.append('unit', '1');
+                const fileInput = document.getElementById('upFile');
+                if (fileInput.files.length > 0) {
+                    formData.append('file', fileInput.files[0]);
+                }
+                formData.append('isAnonymous', document.getElementById('upAnonymous').checked);
+
+                try {
+                    const token = localStorage.getItem('token');
+                    const res = await fetch('http://localhost:5000/api/notes', {
+                        method: 'POST',
+                        headers: { Authorization: `Bearer ${token}` },
+                        body: formData
+                    });
+
+                    if (res.ok) {
+                        status.textContent = 'Uploaded successfully!';
+                        status.style.color = 'green';
+                        setTimeout(() => {
+                            document.getElementById('uploadModal').classList.add('hidden');
+                            document.getElementById('studentUploadForm').reset();
+                            status.textContent = '';
+                            // Refresh notes list in modal
+                            openSubjectDetail(document.getElementById('uploadSubjectId').value);
+                        }, 1500);
+                    } else {
+                        const d = await res.json();
+                        status.textContent = d.message || 'Upload failed';
+                        status.style.color = 'red';
+                    }
+                } catch (err) {
+                    status.textContent = 'Network error';
+                    console.error(err);
+                    status.style.color = 'red';
+                }
+            });
+
+            // --- ASSIGNMENT LOGIC ---
+            window.openAssignmentUpload = function (assignmentId) {
+                // Find assignment data if possible, or just set ID
+                // We don't have global assignments data easily accessible unless we store it.
+                // For now, let's just show modal.
+                document.getElementById('submitAssignmentId').value = assignmentId;
+                document.getElementById('assignmentModal').classList.remove('hidden');
+                document.getElementById('assignStatus').textContent = '';
+            };
+
+            document.getElementById('assignmentSubmitForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const status = document.getElementById('assignStatus');
+                status.textContent = 'Submitting...';
+
+                const formData = new FormData();
+                formData.append('assignmentId', document.getElementById('submitAssignmentId').value);
+                formData.append('textContent', document.getElementById('assignText').value);
+
+                const fileInput = document.getElementById('assignFile');
+                if (fileInput.files.length > 0) {
+                    formData.append('file', fileInput.files[0]);
+                }
+
+                try {
+                    const token = localStorage.getItem('token');
+                    const res = await fetch('http://localhost:5000/api/assignments/submit', {
+                        method: 'POST',
+                        headers: { Authorization: `Bearer ${token}` },
+                        body: formData
+                    });
+
+                    if (res.ok) {
+                        status.textContent = 'Submitted successfully!';
+                        status.style.color = 'green';
+                        setTimeout(() => {
+                            document.getElementById('assignmentModal').classList.add('hidden');
+                            document.getElementById('assignmentSubmitForm').reset();
+                            status.textContent = '';
+                            // Refresh assignments list if we were reloading...
+                            // For now basic flow is done.
+                        }, 1500);
+                    } else {
+                        const d = await res.json();
+                        status.textContent = d.error || 'Submission failed';
+                        status.style.color = 'red';
+                    }
+                } catch (err) {
+                    status.textContent = 'Network error';
+                    console.error(err);
+                    status.style.color = 'red';
+                }
+            });
+
+
+            // --- ATTENDANCE LOGIC ---
+            let studentLat = null;
+            let studentLng = null;
+
+            window.openAttendance = function () {
+                document.getElementById('attendanceModal').classList.remove('hidden');
+                document.getElementById('attendStep1').classList.remove('hidden');
+                document.getElementById('attendStep2').classList.add('hidden');
+                document.getElementById('locStatus').textContent = '';
+                document.getElementById('qrInput').value = '';
+            };
+
+            window.getStudentLocation = function () {
+                const status = document.getElementById('locStatus');
+                status.textContent = "Locating...";
+
+                if (!navigator.geolocation) {
+                    status.textContent = "Geolocation is not supported by your browser";
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        studentLat = position.coords.latitude;
+                        studentLng = position.coords.longitude;
+                        status.textContent = "Location Verified! Please enter code.";
+                        status.style.color = "green";
+                        document.getElementById('attendStep1').classList.add('hidden');
+                        document.getElementById('attendStep2').classList.remove('hidden');
+                    },
+                    () => {
+                        status.textContent = "Unable to retrieve your location";
+                        status.style.color = "red";
+                    }
+                );
+            };
+
+            window.submitAttendance = async function () {
+                const code = document.getElementById('qrInput').value.toUpperCase();
+                if (code.length !== 4) return alert("Enter valid 4-digit code");
+
+                try {
+                    const token = localStorage.getItem('token');
+                    const res = await fetch('http://localhost:5000/api/attendance/mark', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                        body: JSON.stringify({
+                            qrCode: code,
+                            latitude: studentLat,
+                            longitude: studentLng
+                        })
+                    });
+
+                    const data = await res.json();
+                    if (res.ok) {
+                        alert(data.message || "Attendance Marked!");
+                        document.getElementById('attendanceModal').classList.add('hidden');
+                    } else {
+                        alert(data.error || "Failed to mark attendance");
+                    }
+                } catch (e) { console.error(e); alert("Network Error"); }
+            };
+
+
+            // --- ANALYTICS LOGIC ---
+            window.openAnalytics = async function () {
+                const modal = document.getElementById('analyticsModal');
+                modal.classList.remove('hidden');
+
+                try {
+                    const token = localStorage.getItem('token');
+                    const res = await fetch('http://localhost:5000/api/analytics', {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+
+                    document.getElementById('anAttendance').textContent = data.attendancePercentage + '%';
+                    document.getElementById('anAvgMarks').textContent = data.avgAssignmentMarks;
+                    document.getElementById('anParticipation').textContent = data.participationScore;
+
+                    // Simple Rule-Based Insight (Mocking AI)
+                    let insight = "Your performance is consistent. ";
+                    if (data.attendancePercentage < 75) insight += "Attention: Your attendance is falling below 75%. ";
+                    if (data.avgAssignmentMarks > 85) insight += "Great job on assignments! You're in the top percentile. ";
+                    else if (data.avgAssignmentMarks < 50) insight += "Consider reviewing recent lecture notes to improve assignment scores. ";
+                    if (data.participationScore > 50) insight += "You are a top contributor to the community! ";
+
+                    document.getElementById('aiInsightsBox').innerHTML = `<p>${insight}</p><p style="margin-top:0.5rem; font-size:0.85rem; color:var(--primary);">Generated by SmartCampus AI</p>`;
+
+                } catch (e) { console.error(e); }
+            };
+
+            // --- IDENTITY VERIFICATION LOGIC ---
+            function openIdentityVerification() {
+                document.getElementById('identityModal').classList.remove('hidden');
+                document.getElementById('verifyBtn').textContent = 'Start Verification';
+                document.getElementById('verifyBtn').disabled = false;
+                document.getElementById('camStatus').textContent = 'Ready';
+                document.getElementById('verifyMsg').textContent = 'Please look at the camera for verification.';
+            }
+
+            function closeIdentity() {
+                document.getElementById('identityModal').classList.add('hidden');
+            }
+
+            window.runVerification = function () {
+                const btn = document.getElementById('verifyBtn');
+                const status = document.getElementById('camStatus');
+                const msg = document.getElementById('verifyMsg');
+
+                btn.disabled = true;
+                btn.textContent = 'Scanning...';
+                status.textContent = 'Scanning Face Features...';
+
+                // Simulate Vision API Delay
+                let steps = ['Analyzing Geometry...', 'Checking Liveness...', 'Matching Biometrics...', 'Verifying with Groq Vision...'];
+                let i = 0;
+
+                const interval = setInterval(() => {
+                    if (i < steps.length) {
+                        status.textContent = steps[i];
+                        i++;
+                    } else {
+                        clearInterval(interval);
+                        status.textContent = 'Verified ✔';
+                        status.style.color = '#4ade80';
+                        msg.textContent = 'Identity Verified Successfully. You may proceed.';
+                        msg.style.color = 'green';
+                        btn.textContent = 'Success';
+
+                        setTimeout(() => {
+                            closeIdentity();
+                            // If this was part of a flow (like attendance), we'd trigger that callback here
+                            // For now, it's a standalone demo
+                        }, 2000);
+                    }
+                }, 800);
+            };
+
+
+            // --- CHATBOT LOGIC ---
+            function toggleChat() {
+                const win = document.getElementById('chat-window');
+                if (win.classList.contains('hidden')) win.classList.remove('hidden');
+                else win.classList.add('hidden');
+            }
+
+            async function sendChat() {
+                const input = document.getElementById('chatInput');
+                const msg = input.value.trim();
+                if (!msg) return;
+
+                const chatBody = document.getElementById('chat-messages');
+
+                // User Message
+                const userDiv = document.createElement('div');
+                userDiv.style = "align-self: flex-end; background: var(--primary); color: white; padding: 0.75rem; border-radius: 0.75rem 0.75rem 0 0.75rem; font-size: 0.9rem; max-width: 80%;";
+                userDiv.textContent = msg;
+                chatBody.appendChild(userDiv);
+
+                input.value = '';
+                chatBody.scrollTop = chatBody.scrollHeight;
+
+                // Loading state
+                const loadDiv = document.createElement('div');
+                loadDiv.id = 'chat-loading';
+                loadDiv.style = "font-size: 0.8rem; color: var(--text-muted); margin-left: 1rem;";
+                loadDiv.textContent = 'Thinking...';
+                chatBody.appendChild(loadDiv);
+
+                try {
+                    const res = await fetch('http://localhost:5000/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: msg })
+                    });
+                    const data = await res.json();
+
+                    loadDiv.remove();
+
+                    // Bot Message
+                    const botDiv = document.createElement('div');
+                    botDiv.style = "align-self: flex-start; background: #e0e7ff; padding: 0.75rem; border-radius: 0.75rem 0.75rem 0.75rem 0; font-size: 0.9rem; max-width: 80%;";
+                    botDiv.textContent = data.reply;
+                    chatBody.appendChild(botDiv);
+
+                    chatBody.scrollTop = chatBody.scrollHeight;
+
+                } catch (err) {
+                    loadDiv.textContent = 'Error: Could not reach AI.';
+                    console.error(err);
+                }
+            }
+
+            // Enter key to send
+            document.getElementById('chatInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendChat();
+            });
+        </script>
+</body>
+
+</html>

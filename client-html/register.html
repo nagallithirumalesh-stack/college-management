@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Smart Digital Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="icon" type="image/x-icon" href="https://cdn-icons-png.flaticon.com/512/3437/3437364.png">
+</head>
+
+<body>
+    <div class="split-screen">
+        <!-- Left Section - Form -->
+        <div class="left-pane">
+            <div class="form-container">
+                <div class="brand">
+                    <div class="logo-icon">
+                        <i data-feather="book-open"></i>
+                    </div>
+                    <span class="brand-name">SmartCampus</span>
+                </div>
+
+                <div class="headers">
+                    <h1>Create Account</h1>
+                    <p>Join the next generation of digital learning</p>
+                </div>
+
+                <form id="registerForm">
+                    <div id="errorMessage" class="error-message hidden"></div>
+
+                    <div class="input-group">
+                        <i data-feather="user" class="input-icon"></i>
+                        <input type="text" id="name" placeholder="Full Name" required>
+                    </div>
+
+                    <div class="input-group">
+                        <i data-feather="mail" class="input-icon"></i>
+                        <input type="email" id="email" placeholder="Email address" required>
+                    </div>
+
+                    <div class="input-group">
+                        <i data-feather="lock" class="input-icon"></i>
+                        <input type="password" id="password" placeholder="Password" required>
+                    </div>
+
+                    <div class="input-group">
+                        <i data-feather="users" class="input-icon"></i>
+                        <select id="role"
+                            style="width: 100%; padding: 0.875rem 1rem 0.875rem 3rem; border: 1px solid var(--border); border-radius: 0.75rem; background: #f9fafb; outline: none;">
+                            <option value="student">Student</option>
+                            <option value="faculty">Faculty</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+
+                    <!-- Additional fields hidden/shown based on role could go here, keeping simple for now -->
+
+                    <button type="submit" class="btn-primary" style="margin-top: 1rem;">
+                        Create Account
+                        <i data-feather="arrow-right" class="btn-icon"></i>
+                    </button>
+
+                    <p class="signup-link" style="margin-top: 2rem;">
+                        Already have an account? <a href="index.html">Sign in</a>
+                    </p>
+                </form>
+            </div>
+            <footer>
+                © 2026 Smart Digital Campus. All rights reserved.
+            </footer>
+        </div>
+
+        <!-- Right Section - Image/Showcase (Same as Login) -->
+        <div class="right-pane">
+            <div class="overlay"></div>
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2"></div>
+            <div class="showcase-content">
+                <div class="glass-icon">
+                    <i data-feather="shield"></i>
+                </div>
+                <h2>Join a Community of <br> <span>Innovators</span></h2>
+                <p>Access exclusive resources, connect with top faculty, and showcase your achievements to the world.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        feather.replace();
+
+        // Handle Register logic specifically
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+
+            try {
+                const res = await fetch('http://localhost:5000/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name, email, password, role,
+                        department: 'CSE', // Defaulting for simplicity
+                        semester: 1
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data));
+                    redirectUser(data.role);
+                } else {
+                    showError(data.message || 'Registration failed');
+                }
+            } catch (err) {
+                showError('Network error');
+            }
+        });
+    </script>
+</body>
+
+</html>

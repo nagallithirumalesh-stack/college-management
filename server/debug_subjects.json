@@ -1,0 +1,41 @@
+{
+  "user": {
+    "_id": "6970fb595961e8ec963c4979",
+    "name": "Dr. Sarah Wilson"
+  },
+  "subjects": [
+    {
+      "_id": "6971058da5a647a0288cc922",
+      "name": "Data Structures",
+      "code": "CS301",
+      "department": "CSE",
+      "semester": 3,
+      "faculty": "6971056a0033d2d7e2d48eb2",
+      "createdAt": "2026-01-21T16:57:49.046Z",
+      "updatedAt": "2026-01-21T16:57:49.046Z",
+      "__v": 0
+    },
+    {
+      "_id": "6971058da5a647a0288cc925",
+      "name": "Database Management",
+      "code": "CS302",
+      "department": "CSE",
+      "semester": 3,
+      "faculty": "6971056a0033d2d7e2d48eb2",
+      "createdAt": "2026-01-21T16:57:49.151Z",
+      "updatedAt": "2026-01-21T16:57:49.151Z",
+      "__v": 0
+    },
+    {
+      "_id": "6971058da5a647a0288cc928",
+      "name": "Operating Systems",
+      "code": "CS303",
+      "department": "CSE",
+      "semester": 3,
+      "faculty": "6971056a0033d2d7e2d48eb2",
+      "createdAt": "2026-01-21T16:57:49.257Z",
+      "updatedAt": "2026-01-21T16:57:49.257Z",
+      "__v": 0
+    }
+  ]
+}

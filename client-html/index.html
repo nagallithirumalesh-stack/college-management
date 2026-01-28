@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Smart Digital Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Feather Icons -->
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="icon" type="image/x-icon" href="https://cdn-icons-png.flaticon.com/512/3437/3437364.png">
+</head>
+
+<body>
+    <div class="split-screen">
+        <!-- Left Section - Form -->
+        <div class="left-pane">
+            <div class="form-container">
+                <div class="brand">
+                    <div class="logo-icon">
+                        <i data-feather="book-open"></i>
+                    </div>
+                    <span class="brand-name">SmartCampus</span>
+                </div>
+
+                <div class="headers">
+                    <h1>Welcome back</h1>
+                    <p>Please enter your details to sign in</p>
+                </div>
+
+                <form id="loginForm">
+                    <div id="errorMessage" class="error-message hidden"></div>
+
+                    <div class="input-group">
+                        <i data-feather="mail" class="input-icon"></i>
+                        <input type="email" id="email" placeholder="Email address" required>
+                    </div>
+
+                    <div class="input-group">
+                        <i data-feather="lock" class="input-icon"></i>
+                        <input type="password" id="password" placeholder="Password" required>
+                    </div>
+
+                    <div class="options">
+                        <label class="checkbox-container">
+                            <input type="checkbox">
+                            <span class="checkmark"></span>
+                            Remember me
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-primary">
+                        Sign in
+                        <i data-feather="arrow-right" class="btn-icon"></i>
+                    </button>
+
+                    <div class="divider">
+                        <span>Or continue with</span>
+                    </div>
+
+                    <div class="social-login">
+                        <button type="button" class="btn-social">
+                            <i data-feather="chrome"></i> Google
+                        </button>
+                        <button type="button" class="btn-social">
+                            <i data-feather="github"></i> GitHub
+                        </button>
+                    </div>
+
+                    <p class="signup-link">
+                        Don't have an account? <a href="register.html">Sign up for free</a>
+                    </p>
+                </form>
+            </div>
+            <footer>
+                © 2026 Smart Digital Campus. All rights reserved.
+            </footer>
+        </div>
+
+        <!-- Right Section - Image/Showcase -->
+        <div class="right-pane">
+            <div class="overlay"></div>
+            <!-- Abstract Shapes -->
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2"></div>
+
+            <div class="showcase-content">
+                <div class="glass-icon">
+                    <i data-feather="book-open"></i>
+                </div>
+                <h2>The Future of <br> <span>Digital Education</span></h2>
+                <p>Seamlessly connect with faculty, track your academic progress, and collaborate with peers in one
+                    unified platform.</p>
+
+                <!-- Glass Card -->
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="avatar">A+</div>
+                        <div>
+                            <p class="card-title">Academic Excellence</p>
+                            <p class="card-subtitle">Track your verified achievements</p>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <div class="card-stats">
+                        <span>Progress</span>
+                        <span>Top 5%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        feather.replace();
+    </script>
+</body>
+
+</html>
