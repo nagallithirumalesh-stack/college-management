@@ -1,21 +1,11 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const FirestoreModel = require('./FirestoreModel');
 
-const Year = sequelize.define('Year', {
-    year: {
-        type: DataTypes.ENUM('1st Year', '2nd Year', '3rd Year', '4th Year'),
-        allowNull: false,
-    },
-    departmentId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'Departments',
-            key: 'id'
-        }
-    },
-}, {
-    timestamps: true,
-});
+class Year extends FirestoreModel {
+    static get collectionName() {
+        return 'years';
+    }
+}
+
+Year.associate = (models) => { };
 
 module.exports = Year;

@@ -1,25 +1,11 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const FirestoreModel = require('./FirestoreModel');
 
-const Period = sequelize.define('Period', {
-    periodNumber: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
-    startTime: {
-        type: DataTypes.TIME,
-        allowNull: false,
-    },
-    endTime: {
-        type: DataTypes.TIME,
-        allowNull: false,
-    },
-    dayOfWeek: {
-        type: DataTypes.ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'),
-        allowNull: false,
-    },
-}, {
-    timestamps: true,
-});
+class Period extends FirestoreModel {
+    static get collectionName() {
+        return 'periods';
+    }
+}
+
+Period.associate = (models) => { };
 
 module.exports = Period;

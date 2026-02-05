@@ -4,7 +4,7 @@ const Subject = require('../models/Subject');
 const User = require('../models/User');
 const crypto = require('crypto');
 const Mark = require('../models/Mark');
-const { Op } = require('sequelize');
+// const { Op } = require('sequelize');
 
 // Utility: Check microwave signal proximity
 function checkMicrowaveProximity(signalStrength, threshold) {
@@ -157,13 +157,14 @@ exports.getSubjectStats = async (req, res) => {
 
         for (const student of students) {
             // Count attended sessions
-            const attendedCount = await AttendanceRecord.count({
+            // Firestore optimization: Fetch all for student, then filter
+            const studentRecords = await AttendanceRecord.findAll({
                 where: {
                     studentId: student.id,
-                    status: 'present',
-                    sessionId: { [Op.in]: sessionIds }
+                    status: 'present'
                 }
             });
+            const attendedCount = studentRecords.filter(r => sessionIds.includes(r.sessionId)).length;
 
             report.push({
                 _id: student.id,
@@ -198,14 +199,22 @@ exports.getManualList = async (req, res) => {
         if (section) studentFilter.section = section;
         if (year) {
             const y = parseInt(year);
-            studentFilter.semester = { [Op.in]: [(y * 2) - 1, y * 2] };
+            // studentFilter.semester = { [Op.in]: [(y * 2) - 1, y * 2] }; // Removed Op.in
+            // Manual filter logic moved to after fetch or assume strict equality for now?
+            // Let's filter in memory
         }
 
         // 2. Get Students
-        const students = await User.findAll({
-            where: studentFilter,
+        let students = await User.findAll({
+            where: studentFilter, // Basic filters
             attributes: ['id', 'name', 'email', 'rollNo', 'department', 'semester', 'section']
         });
+
+        if (year) {
+            const y = parseInt(year);
+            const sems = [(y * 2) - 1, y * 2];
+            students = students.filter(s => sems.includes(s.semester));
+        }
 
         // 3. Find if there's ALREADY a session for this specific criteria today
         const todayStart = new Date();
@@ -214,12 +223,13 @@ exports.getManualList = async (req, res) => {
         todayEnd.setHours(23, 59, 59, 999);
 
         // Find today's session for this subject (QR or MANUAL)
-        const todaysSession = await AttendanceSession.findOne({
-            where: {
-                subjectId,
-                createdAt: { [Op.between]: [todayStart, todayEnd] }
-            },
-            order: [['createdAt', 'DESC']]
+        const allSubjectSessions = await AttendanceSession.findAll({
+            where: { subjectId }
+        });
+        // Filter in memory for date range
+        const todaysSession = allSubjectSessions.find(s => {
+            const d = new Date(s.createdAt);
+            return d >= todayStart && d <= todayEnd;
         });
 
         let attendanceMap = {};
@@ -274,12 +284,10 @@ exports.saveManualSession = async (req, res) => {
         const endOfDay = new Date(sessionDate); endOfDay.setHours(23, 59, 59, 999);
 
         // Find match (prioritize existing session to merge data)
-        let session = await AttendanceSession.findOne({
-            where: {
-                subjectId,
-                createdAt: { [Op.between]: [startOfDay, endOfDay] }
-            },
-            order: [['createdAt', 'DESC']]
+        const daySessions = await AttendanceSession.findAll({ where: { subjectId } });
+        let session = daySessions.find(s => {
+            const d = new Date(s.createdAt);
+            return d >= startOfDay && d <= endOfDay;
         });
 
         if (!session) {
@@ -357,11 +365,8 @@ exports.getAttendanceGrid = async (req, res) => {
         const sessionIds = sessions.map(s => s.id);
         let records = [];
         if (sessionIds.length > 0) {
-            records = await AttendanceRecord.findAll({
-                where: {
-                    sessionId: { [Op.in]: sessionIds }
-                }
-            });
+            const allRecords = await AttendanceRecord.findAll({});
+            records = allRecords.filter(r => sessionIds.includes(r.sessionId));
         }
 
         // 4. Map records for O(1) access

@@ -1,26 +1,11 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const FirestoreModel = require('./FirestoreModel');
 
-const Mark = sequelize.define('Mark', {
-    examType: {
-        type: DataTypes.STRING, // Midsem 1, Final, etc.
-        allowNull: false,
-    },
-    marksObtained: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
-    maxMarks: {
-        type: DataTypes.INTEGER,
-        defaultValue: 100,
-    },
-}, {
-    timestamps: true
-});
+class Mark extends FirestoreModel {
+    static get collectionName() {
+        return 'marks';
+    }
+}
 
-Mark.associate = (models) => {
-    Mark.belongsTo(models.User, { foreignKey: 'studentId', as: 'student' });
-    Mark.belongsTo(models.Subject, { foreignKey: 'subjectId', as: 'subject' });
-};
+Mark.associate = (models) => { };
 
 module.exports = Mark;

@@ -27,8 +27,8 @@ A comprehensive web application for managing college attendance and digital camp
 ### Server (Backend)
 - **Runtime**: Node.js
 - **Framework**: Express.js
-- **Database**: SQLite (via Sequelize)
-- **Authentication**: JSON Web Token (JWT) + Bcrypt
+- **Database**: Firebase Firestore (NoSQL)
+- **Authentication**: JSON Web Token (JWT) + Bcrypt (User Data in Firestore)
 - **AI**: Groq SDK
 - **File Handling**: Multer
 
@@ -66,8 +66,14 @@ A comprehensive web application for managing college attendance and digital camp
     PORT=5000
     JWT_SECRET=your_jwt_secret
     GROQ_API_KEY=your_groq_api_key
+    VITE_FIREBASE_API_KEY=...
+    VITE_FIREBASE_AUTH_DOMAIN=...
+    VITE_FIREBASE_PROJECT_ID=...
+    VITE_FIREBASE_STORAGE_BUCKET=...
+    VITE_FIREBASE_MESSAGING_SENDER_ID=...
+    VITE_FIREBASE_APP_ID=...
     ```
-    *Note: The application uses a local SQLite database, so no external database configuration is required.*
+    *Note: The application uses Firebase Firestore. Ensure you have a valid Firebase project and credentials.*
 
 3.  **Setup Frontend:**
     ```bash
@@ -94,5 +100,5 @@ A comprehensive web application for managing college attendance and digital camp
 ## Usage
 
 - Navigate to the frontend URL.
-- Register a new account or log in with demo credentials (see `server/seed_sqlite.js`).
+- Register a new account or log in with demo credentials (generated via `server/seed_firebase.js`).
 - Explore the dashboard, try the AI chat, or test the attendance features.

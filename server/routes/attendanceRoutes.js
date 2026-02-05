@@ -6,7 +6,7 @@ const controller = require('../controllers/attendanceController');
 const AttendanceSession = require('../models/AttendanceSession');
 const AttendanceRecord = require('../models/AttendanceRecord');
 const Subject = require('../models/Subject');
-const { Op } = require('sequelize');
+// const { Op } = require('sequelize');
 
 // Configure multer for image upload
 const storage = multer.memoryStorage();
@@ -45,13 +45,13 @@ router.get('/stats/:studentId', protect, async (req, res) => {
             });
             const sessionIds = sessions.map(s => s.id);
 
-            const attendedCount = await AttendanceRecord.count({
+            const allRecords = await AttendanceRecord.findAll({
                 where: {
                     studentId: studentId,
-                    status: 'present',
-                    sessionId: { [Op.in]: sessionIds }
+                    status: 'present'
                 }
             });
+            const attendedCount = allRecords.filter(r => sessionIds.includes(r.sessionId)).length;
 
             if (totalSessions >= 0) { // even if 0, show it
                 const percentage = totalSessions === 0 ? 0 : Math.round((attendedCount / totalSessions) * 100);
@@ -149,13 +149,13 @@ router.get('/export/subject/:subjectId/summary', protect, async (req, res) => {
 
         for (const student of students) {
             // Count attended sessions
-            const attendedCount = await AttendanceRecord.count({
+            const allStudentRecords = await AttendanceRecord.findAll({
                 where: {
                     studentId: student.id,
-                    status: 'present',
-                    sessionId: { [Op.in]: sessionIds }
+                    status: 'present'
                 }
             });
+            const attendedCount = allStudentRecords.filter(r => sessionIds.includes(r.sessionId)).length;
 
             report.push({
                 id: student.id,

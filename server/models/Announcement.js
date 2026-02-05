@@ -1,32 +1,11 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const FirestoreModel = require('./FirestoreModel');
 
-const Announcement = sequelize.define('Announcement', {
-    title: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    content: {
-        type: DataTypes.TEXT, // Using TEXT for longer content
-        allowNull: false,
-    },
-    type: {
-        type: DataTypes.ENUM('Circular', 'Event', 'News', 'Alert'),
-        defaultValue: 'Circular',
-    },
-    targetAudience: {
-        type: DataTypes.ENUM('All', 'Student', 'Faculty'),
-        defaultValue: 'All',
-    },
-    department: {
-        type: DataTypes.STRING,
-    },
-}, {
-    timestamps: true
-});
+class Announcement extends FirestoreModel {
+    static get collectionName() {
+        return 'announcements';
+    }
+}
 
-Announcement.associate = (models) => {
-    Announcement.belongsTo(models.User, { as: 'createdBy', foreignKey: 'createdById' });
-};
+Announcement.associate = (models) => { };
 
 module.exports = Announcement;

@@ -1,39 +1,14 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const FirestoreModel = require('./FirestoreModel');
 
-const Subject = sequelize.define('Subject', {
-    name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    code: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
-    },
-    department: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    semester: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
-    credits: {
-        type: DataTypes.INTEGER,
-        defaultValue: 3,
-    },
-    // Faculty mapping: Firestore User ID
-    facultyId: {
-        type: DataTypes.STRING,
-        allowNull: true
+class Subject extends FirestoreModel {
+    static get collectionName() {
+        return 'subjects';
     }
-}, {
-    timestamps: true
-});
+}
 
+// Dummy associate mostly
 Subject.associate = (models) => {
-    // Subject.belongsTo(models.User, { as: 'faculty', foreignKey: 'facultyId' }); // Decoupled
+    // Relationships handled via ID
 };
 
 module.exports = Subject;

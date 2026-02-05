@@ -1,25 +1,11 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const FirestoreModel = require('./FirestoreModel');
 
-const Notification = sequelize.define('Notification', {
-    message: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    type: {
-        type: DataTypes.STRING, // info, warning, success
-        defaultValue: 'info',
-    },
-    read: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false,
-    },
-}, {
-    timestamps: true
-});
+class Notification extends FirestoreModel {
+    static get collectionName() {
+        return 'notifications';
+    }
+}
 
-Notification.associate = (models) => {
-    Notification.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
-};
+Notification.associate = (models) => { };
 
 module.exports = Notification;

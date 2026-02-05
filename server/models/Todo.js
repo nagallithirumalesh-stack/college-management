@@ -1,21 +1,11 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const FirestoreModel = require('./FirestoreModel');
 
-const Todo = sequelize.define('Todo', {
-    task: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    completed: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false,
-    },
-}, {
-    timestamps: true
-});
+class Todo extends FirestoreModel {
+    static get collectionName() {
+        return 'todos';
+    }
+}
 
-Todo.associate = (models) => {
-    Todo.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
-};
+Todo.associate = (models) => { };
 
 module.exports = Todo;

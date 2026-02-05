@@ -1,31 +1,13 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const FirestoreModel = require('./FirestoreModel');
 
-const Classroom = sequelize.define('Classroom', {
-    department: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    semester: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
-    section: {
-        type: DataTypes.STRING,
-        defaultValue: 'A',
-    },
-}, {
-    timestamps: true,
-    indexes: [
-        {
-            unique: true,
-            fields: ['department', 'semester', 'section']
-        }
-    ]
-});
+class Classroom extends FirestoreModel {
+    static get collectionName() {
+        return 'classrooms';
+    }
+}
 
 Classroom.associate = (models) => {
-    Classroom.belongsTo(models.User, { foreignKey: 'classTeacherId', as: 'classTeacher' });
+    // Relationships handled via ID
 };
 
 module.exports = Classroom;

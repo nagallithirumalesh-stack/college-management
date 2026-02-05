@@ -3,7 +3,7 @@ const router = express.Router();
 const Announcement = require('../models/Announcement');
 const User = require('../models/User'); // For include
 const { protect, restrictTo } = require('../middleware/authMiddleware');
-const { Op } = require('sequelize');
+// const { Op } = require('sequelize');
 
 // @desc    Get all announcements
 // @route   GET /api/announcements
@@ -12,26 +12,25 @@ router.get('/', protect, async (req, res) => {
         const { type } = req.query;
         let where = {};
 
-        // Basic filtering
-        if (type) where.type = type;
+        const allAnnouncements = await Announcement.findAll({
+            where: {
+                // type: type // handled later
+            },
+            order: [['createdAt', 'DESC']]
+            // include: ... (Decoupled, manual fetch if needed)
+        });
 
-        // Role based filtering
-        if (req.user.role === 'student') {
-            where.targetAudience = { [Op.in]: ['All', 'Student'] };
-        } else if (req.user.role === 'faculty') {
-            where.targetAudience = { [Op.in]: ['All', 'Faculty'] };
-        }
+        const announcements = allAnnouncements.filter(a => {
+            let matchType = true;
+            if (type) matchType = a.type === type;
 
-        const announcements = await Announcement.findAll({
-            where,
-            order: [['createdAt', 'DESC']],
-            include: [
-                {
-                    model: User,
-                    as: 'createdBy',
-                    attributes: ['name', 'role']
-                }
-            ]
+            let matchAudience = true;
+            if (req.user.role === 'student') {
+                matchAudience = ['All', 'Student'].includes(a.targetAudience);
+            } else if (req.user.role === 'faculty') {
+                matchAudience = ['All', 'Faculty'].includes(a.targetAudience);
+            }
+            return matchType && matchAudience;
         });
 
         res.json(announcements);

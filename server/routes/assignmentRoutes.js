@@ -4,7 +4,7 @@ const Assignment = require('../models/Assignment');
 const Submission = require('../models/Submission');
 const { protect } = require('../middleware/authMiddleware');
 const multer = require('multer');
-const { Op } = require('sequelize');
+// const { Op } = require('sequelize');
 
 // File Upload Config
 const storage = multer.diskStorage({
@@ -48,12 +48,12 @@ router.get('/subject/:subjectId', protect, async (req, res) => {
         // Include submission status if Student
         if (req.user.role === 'student') {
             const assignmentIds = assignments.map(a => a.id);
-            const submissions = await Submission.findAll({
+            const allSubmissions = await Submission.findAll({
                 where: {
-                    studentId: req.user.id,
-                    assignmentId: { [Op.in]: assignmentIds }
+                    studentId: req.user.id
                 }
             });
+            const submissions = allSubmissions.filter(s => assignmentIds.includes(s.assignmentId));
 
             const result = assignments.map(a => {
                 const sub = submissions.find(s => s.assignmentId === a.id);
@@ -102,7 +102,7 @@ router.get('/submissions/:assignmentId', protect, async (req, res) => {
     try {
         const submissions = await Submission.findAll({
             where: { assignmentId: req.params.assignmentId },
-            include: ['student'], // Alias defined in Submission.associate? 'student'
+            // include: ['student'],
             order: [['submittedAt', 'ASC']]
         });
         res.json(submissions);

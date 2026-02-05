@@ -1,35 +1,11 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const FirestoreModel = require('./FirestoreModel');
 
-const Event = sequelize.define('Event', {
-    title: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    description: {
-        type: DataTypes.TEXT,
-    },
-    resource: {
-        type: DataTypes.STRING, // Room, or Link
-    },
-    start: {
-        type: DataTypes.DATE,
-        allowNull: false,
-    },
-    end: {
-        type: DataTypes.DATE,
-        allowNull: false,
-    },
-    status: {
-        type: DataTypes.ENUM('Pending', 'Approved', 'Rejected'),
-        defaultValue: 'Pending',
-    },
-}, {
-    timestamps: true
-});
+class Event extends FirestoreModel {
+    static get collectionName() {
+        return 'events';
+    }
+}
 
-Event.associate = (models) => {
-    Event.belongsTo(models.User, { foreignKey: 'organizerId', as: 'organizer' });
-};
+Event.associate = (models) => { };
 
 module.exports = Event;

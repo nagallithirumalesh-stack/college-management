@@ -1,32 +1,11 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const FirestoreModel = require('./FirestoreModel');
 
-const AttendanceRecord = sequelize.define('AttendanceRecord', {
-    status: {
-        type: DataTypes.ENUM('present', 'absent', 'late'),
-        defaultValue: 'present',
-    },
-    timestamp: {
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
-    },
-    deviceInfo: {
-        type: DataTypes.JSON, // { deviceId, ip, etc }
-    },
-    verificationMethod: {
-        type: DataTypes.ENUM('qr', 'manual', 'face'),
-        defaultValue: 'qr',
-    },
-    distanceMetadata: {
-        type: DataTypes.JSON, // { distance, allowedRadius, units }
-    },
-}, {
-    timestamps: true
-});
+class AttendanceRecord extends FirestoreModel {
+    static get collectionName() {
+        return 'attendance_records';
+    }
+}
 
-AttendanceRecord.associate = (models) => {
-    AttendanceRecord.belongsTo(models.AttendanceSession, { foreignKey: 'sessionId', as: 'session' });
-    AttendanceRecord.belongsTo(models.User, { foreignKey: 'studentId', as: 'student' });
-};
+AttendanceRecord.associate = (models) => { };
 
 module.exports = AttendanceRecord;

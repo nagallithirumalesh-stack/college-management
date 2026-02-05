@@ -1,25 +1,11 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const FirestoreModel = require('./FirestoreModel');
 
-const PerformanceMetric = sequelize.define('PerformanceMetric', {
-    cpa: {
-        type: DataTypes.FLOAT,
-        defaultValue: 0.0,
-    },
-    attendancePercentage: {
-        type: DataTypes.FLOAT,
-        defaultValue: 0.0,
-    },
-    creditsEarned: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0,
-    },
-}, {
-    timestamps: true
-});
+class PerformanceMetric extends FirestoreModel {
+    static get collectionName() {
+        return 'performance_metrics';
+    }
+}
 
-PerformanceMetric.associate = (models) => {
-    PerformanceMetric.belongsTo(models.User, { foreignKey: 'studentId', as: 'student' });
-};
+PerformanceMetric.associate = (models) => { };
 
 module.exports = PerformanceMetric;

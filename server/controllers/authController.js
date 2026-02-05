@@ -1,6 +1,6 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
-const { Op } = require('sequelize');
+// const { Op } = require('sequelize');
 
 const generateToken = (id) => {
     const secret = process.env.JWT_SECRET || 'supersecretkey123456789';
@@ -58,11 +58,11 @@ exports.loginUser = async (req, res) => {
         console.log(`Attempting login for: ${email}`);
 
         // Allow login with either email or username
-        const user = await User.findOne({
-            where: {
-                [Op.or]: [{ email: email }, { username: email }]
-            }
-        });
+        // Allow login with either email or username
+        let user = await User.findOne({ where: { email } });
+        if (!user) {
+            user = await User.findOne({ where: { username: email } });
+        }
 
         if (!user) {
             console.log("User not found.");
