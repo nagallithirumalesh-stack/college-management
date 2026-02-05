@@ -19,7 +19,7 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:8080'], // Allow both React and HTML clients
+    origin: ['http://localhost:5173', 'http://localhost:8080', 'https://college-management-coral.vercel.app', 'https://college-management-ten.vercel.app'], // Added likely Vercel domains
     credentials: true
 }));
 
@@ -68,13 +68,17 @@ app.get('/', (req, res) => {
 });
 
 // Start Server
-// Start Server
+const { onRequest } = require("firebase-functions/v2/https");
+
+// Start Server (Local)
 if (require.main === module) {
     const server = app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
     });
 }
 
+// Export for Firebase Functions
+exports.api = onRequest(app);
 module.exports = app;
 
 // Force keep-alive (Debug)
