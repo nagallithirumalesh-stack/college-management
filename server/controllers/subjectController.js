@@ -17,8 +17,8 @@ exports.getSubjects = async (req, res) => {
         }
 
         const subjects = await Subject.findAll({
-            where: whereClause,
-            include: [{ model: User, as: 'faculty', attributes: ['name', 'email'] }]
+            where: whereClause
+            // include: [{ model: User, as: 'faculty', attributes: ['name', 'email'] }] // Decoupled
         });
         res.json(subjects);
     } catch (error) {
@@ -67,9 +67,8 @@ exports.getFaculties = async (req, res) => {
 // @access  Private
 exports.getSubjectById = async (req, res) => {
     try {
-        const subject = await Subject.findByPk(req.params.id, {
-            include: [{ model: User, as: 'faculty', attributes: ['name', 'email'] }]
-        });
+        const subject = await Subject.findByPk(req.params.id);
+        // include: [{ model: User, as: 'faculty', attributes: ['name', 'email'] }] // Decoupled
 
         if (!subject) {
             return res.status(404).json({ message: 'Subject not found' });
@@ -89,8 +88,8 @@ exports.getMySubjects = async (req, res) => {
             where: {
                 department: req.user.department,
                 semester: req.user.semester
-            },
-            include: [{ model: User, as: 'faculty', attributes: ['name', 'email'] }]
+            }
+            // include: [{ model: User, as: 'faculty', attributes: ['name', 'email'] }] // Decoupled
         });
         res.json(subjects);
     } catch (error) {

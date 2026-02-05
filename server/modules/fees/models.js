@@ -30,6 +30,9 @@ const StudentFee = sequelize.define('StudentFee', {
     pendingAmount: { type: DataTypes.DECIMAL(10, 2) }, // Virtual/Calculated usually, but storing for quick query
     status: { type: DataTypes.ENUM('PAID', 'PARTIAL', 'PENDING', 'OVERDUE'), defaultValue: 'PENDING' },
     dueDate: { type: DataTypes.DATEONLY },
+    // Explicit Foreign Keys
+    studentId: { type: DataTypes.STRING, allowNull: false }, // Firestore User ID
+    structureId: { type: DataTypes.UUID, allowNull: false } // FeeStructure ID
 });
 
 // 4. Fee Transaction
@@ -42,20 +45,23 @@ const FeeTransaction = sequelize.define('FeeTransaction', {
     paymentDate: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     status: { type: DataTypes.ENUM('SUCCESS', 'FAILED', 'PENDING'), defaultValue: 'SUCCESS' },
     receiptNo: { type: DataTypes.STRING }, // Auto-generated
+    // Explicit Foreign Keys
+    studentFeeId: { type: DataTypes.UUID, allowNull: false },
+    studentId: { type: DataTypes.STRING, allowNull: false } // Firestore User ID
 });
 
 // Associations
 const setupAssociations = (models) => {
     // Fee Structure Associations
-    // (Optional: Link to FeeHeads if needed for explicit relational integrity, but JSON breakdown is often simpler for templates)
+    // (Optional: Link to FeeHeads...)
 
     // StudentFee Associations
-    StudentFee.belongsTo(models.User, { as: 'student', foreignKey: 'studentId' });
+    // StudentFee.belongsTo(models.User, { as: 'student', foreignKey: 'studentId' }); // REMOVED: User is in Firestore
     StudentFee.belongsTo(FeeStructure, { as: 'structure', foreignKey: 'structureId' });
 
     // FeeTransaction Associations
     FeeTransaction.belongsTo(StudentFee, { as: 'studentFee', foreignKey: 'studentFeeId' });
-    FeeTransaction.belongsTo(models.User, { as: 'student', foreignKey: 'studentId' }); // Direct link for easy querying
+    // FeeTransaction.belongsTo(models.User, { as: 'student', foreignKey: 'studentId' }); // REMOVED: User is in Firestore
 };
 
 // Export all models

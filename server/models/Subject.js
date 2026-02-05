@@ -23,15 +23,17 @@ const Subject = sequelize.define('Subject', {
         type: DataTypes.INTEGER,
         defaultValue: 3,
     },
-    // Faculty mapping: Simplified to a string or FK?
-    // Mongoose had `faculty: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }`
-    // We will assume association will be set up.
+    // Faculty mapping: Firestore User ID
+    facultyId: {
+        type: DataTypes.STRING,
+        allowNull: true
+    }
 }, {
     timestamps: true
 });
 
 Subject.associate = (models) => {
-    Subject.belongsTo(models.User, { as: 'faculty', foreignKey: 'facultyId' });
+    // Subject.belongsTo(models.User, { as: 'faculty', foreignKey: 'facultyId' }); // Decoupled
 };
 
 module.exports = Subject;

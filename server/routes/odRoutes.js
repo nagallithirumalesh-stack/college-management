@@ -63,7 +63,7 @@ router.get('/list', protect, async (req, res) => {
 
         const odRequests = await ODRequest.findAll({
             where,
-            include: [{ model: User, as: 'student', attributes: ['name', 'email'] }],
+            // include: [{ model: User, as: 'student', attributes: ['name', 'email'] }], // Decoupled
             order: [['createdAt', 'DESC']]
         });
 

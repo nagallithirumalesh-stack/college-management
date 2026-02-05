@@ -28,11 +28,12 @@ const sequelize = require('./config/database');
 const models = require('./models'); // Load models to ensure they are defined
 
 // Sync Database
-sequelize.query("PRAGMA foreign_keys = OFF")
-    .then(() => sequelize.sync({ alter: true }))
-    .then(() => sequelize.query("PRAGMA foreign_keys = ON"))
-    .then(() => console.log('SQLite Connected & Database Synced'))
-    .catch(err => console.error('SQLite connection error:', err));
+// sequelize.query("PRAGMA foreign_keys = OFF")
+//     .then(() => sequelize.sync({ alter: true }))
+//     .then(() => sequelize.query("PRAGMA foreign_keys = ON"))
+//     .then(() => console.log('SQLite Connected & Database Synced'))
+//     .catch(err => console.error('SQLite connection error:', err));
+console.log('Database sync disabled (Firebase Migration)');
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));

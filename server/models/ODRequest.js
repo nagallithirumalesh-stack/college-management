@@ -7,7 +7,7 @@ const ODRequest = sequelize.define('ODRequest', {
         defaultValue: 'Leave',
     },
     studentId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING, // Changed to STRING for Firestore ID
         allowNull: false,
     },
     purpose: {
@@ -37,7 +37,7 @@ const ODRequest = sequelize.define('ODRequest', {
 });
 
 ODRequest.associate = (models) => {
-    ODRequest.belongsTo(models.User, { foreignKey: 'studentId', as: 'student' });
+    // ODRequest.belongsTo(models.User, { foreignKey: 'studentId', as: 'student' }); // Decoupled
 };
 
 module.exports = ODRequest;

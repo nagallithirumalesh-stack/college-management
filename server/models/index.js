@@ -34,19 +34,21 @@ Object.assign(models, timetableModels);
 
 // Helper to define associations
 // Helper to define associations
-Object.keys(models).forEach(modelName => {
-    if (models[modelName].associate) {
-        models[modelName].associate(models);
-    }
-});
+// Helper to define associations
+// Object.keys(models).forEach(modelName => {
+//     if (models[modelName].associate) {
+//         models[modelName].associate(models);
+//     }
+// });
 
+// Module specific associations
 // Module specific associations
 if (feeModels.setupAssociations) {
     feeModels.setupAssociations(models);
 }
-if (timetableModels.setupAssociations) {
-    timetableModels.setupAssociations(models);
-}
+// if (timetableModels.setupAssociations) {
+//     timetableModels.setupAssociations(models);
+// }
 
 
 module.exports = models;
