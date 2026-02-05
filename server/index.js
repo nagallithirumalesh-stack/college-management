@@ -68,9 +68,14 @@ app.get('/', (req, res) => {
 });
 
 // Start Server
-const server = app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+// Start Server
+if (require.main === module) {
+    const server = app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
+
+module.exports = app;
 
 // Force keep-alive (Debug)
 setInterval(() => {
