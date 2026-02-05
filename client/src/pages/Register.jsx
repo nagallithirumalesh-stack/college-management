@@ -34,7 +34,7 @@ export default function Register() {
                         Create Account
                     </h2>
                     <p className="mt-2 text-sm text-gray-600">
-                        Join the Smart Digital Campus
+                        Join EdTrack
                     </p>
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>

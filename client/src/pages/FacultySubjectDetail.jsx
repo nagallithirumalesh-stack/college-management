@@ -4,13 +4,16 @@ import { useAuth } from '../context/AuthContext';
 import { ArrowLeft, Upload, FilePlus, BookOpen, Users, Clock, Plus, XCircle, MoreVertical } from 'lucide-react';
 
 export default function FacultySubjectDetail() {
-    const { id } = useParams();
+    const { subjectId } = useParams();
+    const id = subjectId; // Keep id for backward compatibility with rest of component
     const navigate = useNavigate();
     const { user } = useAuth();
     const [subject, setSubject] = useState(null);
     const [activeTab, setActiveTab] = useState('content');
     const [notes, setNotes] = useState([]);
     const [studentStats, setStudentStats] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     // QR Session State
     const [showQRModal, setShowQRModal] = useState(false);
@@ -45,12 +48,28 @@ export default function FacultySubjectDetail() {
     }, [id]);
 
     const fetchData = async () => {
+        if (!id || id === 'undefined') {
+            setLoading(false);
+            return;
+        }
+
+        setLoading(true);
+        setError(null);
         const token = localStorage.getItem('token');
+
         try {
             // Fetch Subject Details
             const subRes = await fetch(`http://localhost:5000/api/subjects/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+
+            if (!subRes.ok) {
+                const errorData = await subRes.json().catch(() => ({ message: 'Subject not found' }));
+                setError(errorData.message || `Failed to load subject (${subRes.status})`);
+                setLoading(false);
+                return;
+            }
+
             const subData = await subRes.json();
             setSubject(subData);
 
@@ -58,9 +77,11 @@ export default function FacultySubjectDetail() {
             const notesRes = await fetch(`http://localhost:5000/api/notes/subject/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            const notesData = await notesRes.json();
 
-            setNotes(notesData);
+            if (notesRes.ok) {
+                const notesData = await notesRes.json();
+                setNotes(notesData);
+            }
 
             // Fetch Student Stats
             const statsRes = await fetch(`http://localhost:5000/api/attendance/subject/${id}/stats`, {
@@ -72,6 +93,9 @@ export default function FacultySubjectDetail() {
             }
         } catch (error) {
             console.error("Error fetching data:", error);
+            setError("Network error. Please check your connection.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -134,8 +158,7 @@ export default function FacultySubjectDetail() {
             if (res.ok) {
                 alert('Uploaded successfully!');
                 setShowUploadModal(false);
-                setUploadData({ title: '', description: '', unit: '1', tags: '', isPublic: true, linkUrl: '' });
-                setFile(null);
+                setUploadForm({ title: '', description: '', unit: '1', tags: '', isPublic: true, linkUrl: '', file: null });
                 fetchData(); // Refresh list
             } else {
                 alert('Upload failed.');
@@ -147,7 +170,17 @@ export default function FacultySubjectDetail() {
         }
     };
 
-    if (!subject) return <div className="p-8 text-center text-gray-500">Loading subject...</div>;
+    if (loading) return <div className="p-8 text-center text-gray-500">Loading subject...</div>;
+    if (error) return (
+        <div className="p-8 text-center">
+            <div className="text-red-600 font-bold mb-2">Error Loading Subject</div>
+            <div className="text-gray-600 mb-4">{error}</div>
+            <button onClick={() => navigate('/faculty')} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                Back to Dashboard
+            </button>
+        </div>
+    );
+    if (!subject) return <div className="p-8 text-center text-gray-500">Subject not found.</div>;
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -168,11 +201,11 @@ export default function FacultySubjectDetail() {
                         </div>
                         <div className="flex space-x-3">
                             <button
-                                onClick={() => navigate(`/faculty/attendance/${id}`)}
+                                onClick={() => navigate(`/faculty/qr-generator?subjectId=${id}`)}
                                 className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition shadow-sm"
                             >
                                 <Clock className="w-4 h-4 mr-2" />
-                                Start Session
+                                Start Session (QR)
                             </button>
                             <button
                                 onClick={() => setShowUploadModal(true)}
@@ -262,7 +295,19 @@ export default function FacultySubjectDetail() {
                             <div className="bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden">
                                 <ul className="divide-y divide-gray-100">
                                     {notes.map(note => (
-                                        <li key={note._id} className="p-4 hover:bg-gray-50 transition flex items-center justify-between">
+                                        <li
+                                            key={note.id}
+                                            className="p-4 hover:bg-gray-50 transition flex items-center justify-between cursor-pointer"
+                                            onClick={() => {
+                                                if (note.linkUrl) {
+                                                    window.open(note.linkUrl, '_blank');
+                                                } else if (note.fileUrl) {
+                                                    window.open(`http://localhost:5000${note.fileUrl}`, '_blank');
+                                                } else {
+                                                    alert('No file or link available for this note');
+                                                }
+                                            }}
+                                        >
                                             <div className="flex items-center">
                                                 <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 mr-4">
                                                     <BookOpen className="w-5 h-5" />
@@ -314,8 +359,8 @@ export default function FacultySubjectDetail() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-50">
-                                        {studentStats.students.map((student) => (
-                                            <tr key={student._id} className="hover:bg-gray-50 transition">
+                                        {studentStats.students.map((student, index) => (
+                                            <tr key={student.id || index} className="hover:bg-gray-50 transition">
                                                 <td className="p-4">
                                                     <div className="flex items-center">
                                                         <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xs mr-3">

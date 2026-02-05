@@ -7,7 +7,10 @@ const { protect } = require('../middleware/authMiddleware');
 // @route   GET /api/journal
 router.get('/', protect, async (req, res) => {
     try {
-        const journals = await Journal.find({ user: req.user.id }).sort({ date: -1 });
+        const journals = await Journal.findAll({
+            where: { userId: req.user.id },
+            order: [['date', 'DESC']]
+        });
         res.json(journals);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -20,11 +23,11 @@ router.post('/', protect, async (req, res) => {
     try {
         const { title, content, mood, date } = req.body;
         const journal = await Journal.create({
-            user: req.user.id,
+            userId: req.user.id,
             title,
             content,
             mood,
-            date: date || Date.now()
+            date: date || new Date()
         });
         res.status(201).json(journal);
     } catch (err) {

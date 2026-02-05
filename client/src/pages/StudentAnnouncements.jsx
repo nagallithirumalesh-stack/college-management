@@ -59,7 +59,7 @@ export default function StudentAnnouncements() {
                             </div>
                         ) : (
                             announcements.map(item => (
-                                <div key={item._id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition">
+                                <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition">
                                     <div className="flex justify-between items-start mb-3">
                                         <div className="flex items-center space-x-3">
                                             <div className={`p-2 rounded-lg bg-gray-50`}>

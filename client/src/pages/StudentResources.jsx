@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ExternalLink, Cpu, Code, BookOpen, Calendar, Rocket, Globe } from 'lucide-react';
-import Logo from '../components/Logo';
+import { ArrowLeft, ExternalLink, Cpu, Code, BookOpen, Calendar, Rocket, Globe, Sparkles, TrendingUp } from 'lucide-react';
 
 export default function StudentResources() {
     const navigate = useNavigate();
     const [selectedBook, setSelectedBook] = useState(null);
+    const [selectedHackathon, setSelectedHackathon] = useState(null);
 
-    // Mock Data
     const techNews = [
         {
             id: 1,
@@ -45,7 +44,43 @@ export default function StudentResources() {
             date: "Mar 15-16, 2026",
             location: "Virtual / New Delhi",
             tags: ["GovTech", "Innovation"],
-            color: "bg-orange-500"
+            gradient: "from-orange-500 to-red-500",
+            description: "India's biggest hackathon for solving real-world problems using technology. Organized by the Government of India, this event brings together students to create innovative solutions for various ministries and departments.",
+            prizes: "₹1,00,000 for winners + Certificates",
+            teamSize: "6 members per team",
+            eligibility: "Students from recognized institutions",
+            registrationSteps: [
+                {
+                    step: 1,
+                    title: "Visit Official Website",
+                    description: "Go to sih.gov.in and create an account using your college email ID."
+                },
+                {
+                    step: 2,
+                    title: "Form Your Team",
+                    description: "Assemble a team of 6 members. Ensure diversity in skills (coding, design, domain knowledge)."
+                },
+                {
+                    step: 3,
+                    title: "Select Problem Statement",
+                    description: "Browse through 50+ problem statements from various ministries. Choose one that aligns with your team's expertise."
+                },
+                {
+                    step: 4,
+                    title: "Submit Idea",
+                    description: "Write a detailed proposal (max 1000 words) explaining your solution approach, tech stack, and implementation plan."
+                },
+                {
+                    step: 5,
+                    title: "Wait for Shortlisting",
+                    description: "Shortlisted teams will be notified via email within 2 weeks. Top 100 teams advance to the grand finale."
+                },
+                {
+                    step: 6,
+                    title: "Prepare for Finals",
+                    description: "Build a working prototype and prepare a 10-minute pitch presentation for the finale."
+                }
+            ]
         },
         {
             id: 2,
@@ -53,7 +88,43 @@ export default function StudentResources() {
             date: "Apr 02, 2026",
             location: "Online",
             tags: ["Machine Learning", "Python"],
-            color: "bg-blue-500"
+            gradient: "from-blue-500 to-cyan-500",
+            description: "A 48-hour online hackathon focused on building AI/ML solutions for real-world challenges. Compete with developers worldwide and showcase your machine learning expertise.",
+            prizes: "$10,000 in prizes + Cloud credits",
+            teamSize: "1-4 members per team",
+            eligibility: "Open to all (students & professionals)",
+            registrationSteps: [
+                {
+                    step: 1,
+                    title: "Register on Platform",
+                    description: "Sign up on devpost.com/global-ai-challenge using GitHub or Google account."
+                },
+                {
+                    step: 2,
+                    title: "Join Discord Community",
+                    description: "Join the official Discord server to connect with mentors, sponsors, and fellow participants."
+                },
+                {
+                    step: 3,
+                    title: "Review Challenge Tracks",
+                    description: "Choose from 4 tracks: Healthcare AI, Climate Tech, FinTech, or Open Innovation."
+                },
+                {
+                    step: 4,
+                    title: "Set Up Environment",
+                    description: "Prepare your dev environment. Free cloud credits will be provided for Google Cloud, AWS, or Azure."
+                },
+                {
+                    step: 5,
+                    title: "Build Your Solution",
+                    description: "Develop your ML model during the 48-hour window. Use provided datasets or bring your own."
+                },
+                {
+                    step: 6,
+                    title: "Submit Project",
+                    description: "Upload code to GitHub, deploy a demo, and submit a 3-minute video walkthrough before the deadline."
+                }
+            ]
         },
         {
             id: 3,
@@ -61,7 +132,43 @@ export default function StudentResources() {
             date: "May 20, 2026",
             location: "Bangalore",
             tags: ["Blockchain", "DApps"],
-            color: "bg-purple-500"
+            gradient: "from-purple-500 to-pink-500",
+            description: "Build the future of decentralized applications! This in-person hackathon focuses on blockchain, smart contracts, and Web3 technologies. Network with industry leaders and VCs.",
+            prizes: "₹5,00,000 + Mentorship from Web3 founders",
+            teamSize: "2-5 members per team",
+            eligibility: "Developers with basic blockchain knowledge",
+            registrationSteps: [
+                {
+                    step: 1,
+                    title: "Early Bird Registration",
+                    description: "Register at web3build.in before April 1st to get early bird benefits and exclusive swag."
+                },
+                {
+                    step: 2,
+                    title: "Complete Profile",
+                    description: "Fill out your developer profile including GitHub, previous projects, and blockchain experience level."
+                },
+                {
+                    step: 3,
+                    title: "Attend Pre-Event Workshop",
+                    description: "Join the online workshop on May 10th covering Solidity, Ethereum, and DApp architecture (optional but recommended)."
+                },
+                {
+                    step: 4,
+                    title: "Book Travel & Accommodation",
+                    description: "Venue is in Koramangala, Bangalore. Limited accommodation support available for outstation participants."
+                },
+                {
+                    step: 5,
+                    title: "Hackathon Day",
+                    description: "Arrive at 9 AM for registration. Hacking starts at 11 AM and runs for 24 hours straight."
+                },
+                {
+                    step: 6,
+                    title: "Demo & Judging",
+                    description: "Present your DApp to judges (5 min demo + 3 min Q&A). Winners announced at closing ceremony."
+                }
+            ]
         }
     ];
 
@@ -273,23 +380,27 @@ export default function StudentResources() {
     ];
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col font-sans selection:bg-indigo-100 selection:text-indigo-700">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/20 to-pink-50/20 flex flex-col font-sans relative overflow-hidden">
+            {/* Ambient Background */}
+            <div className="fixed top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-purple-200/20 to-pink-200/20 rounded-full blur-3xl -z-10"></div>
+            <div className="fixed bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-tr from-indigo-200/15 to-blue-200/15 rounded-full blur-3xl -z-10"></div>
+
             {/* Header */}
-            <div className="bg-white/90 backdrop-blur-xl border-b border-gray-100 px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-20">
+            <div className="bg-white/70 backdrop-blur-xl border-b border-white/50 px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-20">
                 <div className="flex items-center">
                     <button
                         onClick={() => navigate('/student')}
-                        className="p-2 -ml-2 rounded-full text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition mr-3 group"
+                        className="p-2.5 -ml-2 rounded-xl text-gray-600 hover:text-indigo-600 hover:bg-white/50 transition mr-3 group"
                     >
                         <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                     </button>
                     <div className="flex items-center">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200 mr-3">
-                            <Rocket className="w-5 h-5 text-white" />
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200 mr-3">
+                            <Rocket className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-xl font-bold text-gray-900 tracking-tight">Tech Hub</h1>
-                            <p className="text-xs font-medium text-gray-500">Resources for Growth</p>
+                            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Tech Hub</h1>
+                            <p className="text-xs font-medium text-gray-600">Resources for Growth & Innovation</p>
                         </div>
                     </div>
                 </div>
@@ -301,28 +412,30 @@ export default function StudentResources() {
                 <section>
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center">
-                            <span className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-3">
-                                <Globe className="w-5 h-5" />
-                            </span>
-                            <h2 className="text-xl font-bold text-gray-900">Trending Tech News</h2>
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mr-3 shadow-md">
+                                <TrendingUp className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                                <h2 className="text-2xl font-black text-gray-900">Trending Tech News</h2>
+                                <p className="text-sm text-gray-600">Stay updated with the latest</p>
+                            </div>
                         </div>
-                        <button className="text-sm font-semibold text-blue-600 hover:text-blue-700">View All</button>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {techNews.map(news => (
-                            <div key={news.id} onClick={() => window.open(news.url, '_blank')} className="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+                            <div key={news.id} onClick={() => window.open(news.url, '_blank')} className="group bg-white/80 backdrop-blur-xl rounded-3xl shadow-lg border border-white/50 overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer">
                                 <div className="h-48 overflow-hidden relative">
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10" />
-                                    <img src={news.image} alt={news.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
-                                    <span className="absolute top-3 right-3 bg-white/90 backdrop-blur text-xs font-bold px-2 py-1 rounded-md shadow-sm z-20">
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10" />
+                                    <img src={news.image} alt={news.title} className="w-full h-full object-cover group-hover:scale-110 transition duration-700" />
+                                    <span className="absolute top-3 right-3 bg-white/90 backdrop-blur text-xs font-bold px-3 py-1.5 rounded-xl shadow-lg z-20">
                                         {news.category}
                                     </span>
                                 </div>
-                                <div className="p-5">
-                                    <div className="flex items-center justify-between text-xs text-gray-400 mb-3 font-medium">
-                                        <span className="flex items-center gap-1 text-indigo-600">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                                <div className="p-6">
+                                    <div className="flex items-center justify-between text-xs text-gray-500 mb-3 font-medium">
+                                        <span className="flex items-center gap-1.5 text-indigo-600 font-semibold">
+                                            <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
                                             {news.source}
                                         </span>
                                         <span>{news.time}</span>
@@ -330,6 +443,9 @@ export default function StudentResources() {
                                     <h3 className="text-lg font-bold text-gray-900 leading-snug mb-2 group-hover:text-indigo-600 transition-colors line-clamp-2">
                                         {news.title}
                                     </h3>
+                                    <div className="flex items-center text-indigo-600 text-sm font-semibold mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        Read more <ExternalLink className="w-3.5 h-3.5 ml-1" />
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -339,46 +455,52 @@ export default function StudentResources() {
                 {/* Hackathons Section */}
                 <section>
                     <div className="flex items-center mb-6">
-                        <span className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center mr-3">
-                            <Code className="w-5 h-5" />
-                        </span>
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mr-3 shadow-md">
+                            <Code className="w-5 h-5 text-white" />
+                        </div>
                         <div>
-                            <h2 className="text-xl font-bold text-gray-900">Upcoming Hackathons</h2>
-                            <p className="text-sm text-gray-500">Compete and level up your skills</p>
+                            <h2 className="text-2xl font-black text-gray-900">Upcoming Hackathons</h2>
+                            <p className="text-sm text-gray-600">Compete and level up your skills</p>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {hackathons.map(hack => (
-                            <div key={hack.id} className="relative group bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:border-purple-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
-                                {/* Decorative Blur */}
-                                <div className={`absolute -right-6 -top-6 w-24 h-24 rounded-full ${hack.color} opacity-5 group-hover:scale-150 transition-transform duration-700 blur-2xl`}></div>
+                            <div
+                                key={hack.id}
+                                onClick={() => setSelectedHackathon(hack)}
+                                className="relative group bg-white/80 backdrop-blur-xl rounded-3xl shadow-lg border border-white/50 p-6 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer"
+                            >
+                                <div className={`absolute -right-10 -top-10 w-32 h-32 rounded-full bg-gradient-to-br ${hack.gradient} opacity-10 group-hover:scale-150 transition-transform duration-700 blur-2xl`}></div>
 
                                 <div className="relative z-10">
                                     <div className="flex justify-between items-start mb-5">
-                                        <div className={`w-12 h-12 rounded-xl ${hack.color} bg-opacity-10 flex items-center justify-center flex-shrink-0`}>
-                                            <Cpu className={`w-6 h-6 ${hack.color.replace('bg-', 'text-')}`} />
+                                        <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${hack.gradient} flex items-center justify-center flex-shrink-0 shadow-lg`}>
+                                            <Cpu className="w-7 h-7 text-white" />
                                         </div>
-                                        <span className="text-xs font-bold bg-gray-50 text-gray-600 px-2 py-1 rounded-md border border-gray-100">
+                                        <span className="text-xs font-bold bg-gray-100 text-gray-700 px-3 py-1.5 rounded-xl border border-gray-200">
                                             {hack.location}
                                         </span>
                                     </div>
 
-                                    <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-purple-600 transition-colors">{hack.title}</h3>
-                                    <p className="text-sm text-gray-500 flex items-center mb-5 font-medium">
-                                        <Calendar className="w-4 h-4 mr-1.5 text-gray-400" /> {hack.date}
+                                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors">{hack.title}</h3>
+                                    <p className="text-sm text-gray-600 flex items-center mb-5 font-medium">
+                                        <Calendar className="w-4 h-4 mr-2 text-gray-400" /> {hack.date}
                                     </p>
 
                                     <div className="flex flex-wrap gap-2 mb-6">
                                         {hack.tags.map(tag => (
-                                            <span key={tag} className="text-[10px] font-bold uppercase tracking-wide px-2 py-1 bg-gray-50 text-gray-500 rounded border border-gray-100">
+                                            <span key={tag} className="text-xs font-bold uppercase tracking-wide px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg border border-gray-200">
                                                 {tag}
                                             </span>
                                         ))}
                                     </div>
 
-                                    <button className="w-full py-2.5 bg-gray-900 text-white rounded-lg font-semibold text-sm hover:bg-gray-800 transition shadow-lg shadow-gray-200 flex items-center justify-center group-hover:translate-y-0.5">
-                                        Register Now <ExternalLink className="w-3 h-3 ml-2 opacity-70" />
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); setSelectedHackathon(hack); }}
+                                        className={`w-full py-3 bg-gradient-to-r ${hack.gradient} text-white rounded-xl font-bold text-sm hover:shadow-xl transition-all shadow-lg flex items-center justify-center group-hover:scale-105`}
+                                    >
+                                        View Details <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
                                     </button>
                                 </div>
                             </div>
@@ -389,22 +511,28 @@ export default function StudentResources() {
                 {/* Recommended Books */}
                 <section>
                     <div className="flex items-center mb-6">
-                        <span className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mr-3">
-                            <BookOpen className="w-5 h-5" />
-                        </span>
-                        <h2 className="text-xl font-bold text-gray-900">Must-Read for Growth</h2>
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mr-3 shadow-md">
+                            <BookOpen className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                            <h2 className="text-2xl font-black text-gray-900">Must-Read for Growth</h2>
+                            <p className="text-sm text-gray-600">Curated books to transform your mindset</p>
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {books.map(book => (
-                            <div key={book.id} onClick={() => setSelectedBook(book)} className="group bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex hover:shadow-lg transition-all duration-300 cursor-pointer">
+                            <div key={book.id} onClick={() => setSelectedBook(book)} className="group bg-white/80 backdrop-blur-xl rounded-3xl shadow-lg border border-white/50 p-5 flex hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer">
                                 <div className="relative">
-                                    <img src={book.cover} alt={book.title} className="w-28 h-40 object-cover rounded-lg shadow-md group-hover:shadow-xl transition-shadow duration-300" />
+                                    <img src={book.cover} alt={book.title} className="w-28 h-40 object-cover rounded-xl shadow-md group-hover:shadow-2xl transition-shadow duration-300" />
+                                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                                        <Sparkles className="w-3.5 h-3.5 text-white" />
+                                    </div>
                                 </div>
                                 <div className="flex-1 flex flex-col pl-5 py-1">
                                     <h3 className="font-bold text-gray-900 leading-tight mb-1 group-hover:text-indigo-600 transition-colors">{book.title}</h3>
                                     <p className="text-sm font-medium text-gray-500 mb-3">{book.author}</p>
-                                    <p className="text-xs text-gray-600 line-clamp-3 mb-auto leading-relaxed opacity-80">{book.desc}</p>
+                                    <p className="text-xs text-gray-600 line-clamp-3 mb-auto leading-relaxed">{book.desc}</p>
                                     <button onClick={(e) => { e.stopPropagation(); setSelectedBook(book); }} className="text-xs font-bold text-indigo-600 hover:text-indigo-800 text-left mt-3 flex items-center">
                                         View Summary <ArrowLeft className="w-3 h-3 ml-1 rotate-180" />
                                     </button>
@@ -414,36 +542,122 @@ export default function StudentResources() {
                     </div>
                 </section>
 
+                {/* Hackathon Details Modal */}
+                {selectedHackathon && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setSelectedHackathon(null)}>
+                        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+                            {/* Modal Header */}
+                            <div className={`relative p-6 border-b border-gray-100 bg-gradient-to-r ${selectedHackathon.gradient} rounded-t-3xl`}>
+                                <div className="absolute inset-0 bg-black/10 rounded-t-3xl"></div>
+                                <div className="relative z-10 flex items-start justify-between">
+                                    <div className="flex items-center">
+                                        <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+                                            <Cpu className="w-7 h-7 text-white" />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-2xl font-black text-white mb-1">{selectedHackathon.title}</h2>
+                                            <p className="text-white/90 text-sm font-medium flex items-center">
+                                                <Calendar className="w-4 h-4 mr-2" /> {selectedHackathon.date} • {selectedHackathon.location}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => setSelectedHackathon(null)} className="p-2 bg-white/20 backdrop-blur-sm rounded-xl hover:bg-white/30 transition">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Modal Content */}
+                            <div className="p-8 overflow-y-auto custom-scrollbar">
+                                {/* Description */}
+                                <p className="text-gray-700 leading-relaxed mb-6">{selectedHackathon.description}</p>
+
+                                {/* Quick Info Grid */}
+                                <div className="grid grid-cols-3 gap-4 mb-8">
+                                    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-4 rounded-2xl border border-indigo-100">
+                                        <p className="text-xs font-bold text-indigo-600 uppercase tracking-wide mb-1">Prizes</p>
+                                        <p className="text-sm font-bold text-gray-900">{selectedHackathon.prizes}</p>
+                                    </div>
+                                    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-2xl border border-blue-100">
+                                        <p className="text-xs font-bold text-blue-600 uppercase tracking-wide mb-1">Team Size</p>
+                                        <p className="text-sm font-bold text-gray-900">{selectedHackathon.teamSize}</p>
+                                    </div>
+                                    <div className="bg-gradient-to-br from-emerald-50 to-teal-50 p-4 rounded-2xl border border-emerald-100">
+                                        <p className="text-xs font-bold text-emerald-600 uppercase tracking-wide mb-1">Eligibility</p>
+                                        <p className="text-sm font-bold text-gray-900">{selectedHackathon.eligibility}</p>
+                                    </div>
+                                </div>
+
+                                {/* Registration Steps */}
+                                <div className="mb-6">
+                                    <h3 className="text-xl font-black text-gray-900 mb-4 flex items-center">
+                                        <Sparkles className="w-5 h-5 mr-2 text-indigo-600" /> Registration Steps
+                                    </h3>
+                                    <div className="space-y-4">
+                                        {selectedHackathon.registrationSteps.map((step, idx) => (
+                                            <div key={step.step} className="flex gap-4 group">
+                                                <div className={`flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br ${selectedHackathon.gradient} flex items-center justify-center text-white font-black shadow-lg group-hover:scale-110 transition-transform`}>
+                                                    {step.step}
+                                                </div>
+                                                <div className="flex-1 bg-gray-50 p-4 rounded-2xl border border-gray-100 group-hover:border-indigo-200 group-hover:bg-white transition-all">
+                                                    <h4 className="font-bold text-gray-900 mb-1">{step.title}</h4>
+                                                    <p className="text-sm text-gray-600 leading-relaxed">{step.description}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Tags */}
+                                <div className="flex flex-wrap gap-2">
+                                    {selectedHackathon.tags.map(tag => (
+                                        <span key={tag} className="text-xs font-bold uppercase tracking-wide px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg border border-gray-200">
+                                            {tag}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Modal Footer */}
+                            <div className="p-4 border-t border-gray-100 bg-gray-50/50 backdrop-blur-xl rounded-b-3xl flex justify-between items-center">
+                                <button onClick={() => setSelectedHackathon(null)} className="px-5 py-2.5 text-gray-600 hover:bg-gray-100 rounded-xl transition font-medium">
+                                    Close
+                                </button>
+                                <button className={`px-6 py-2.5 bg-gradient-to-r ${selectedHackathon.gradient} text-white rounded-xl font-bold hover:shadow-xl transition-all shadow-lg flex items-center`}>
+                                    Start Registration <ExternalLink className="w-4 h-4 ml-2" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Book Summary Modal */}
                 {selectedBook && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setSelectedBook(null)}>
-                        <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
-                            {/* Modal Header */}
+                        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-start justify-between p-6 border-b border-gray-100">
                                 <div className="flex items-center">
-                                    <img src={selectedBook.cover} className="w-12 h-16 object-cover rounded shadow-sm mr-4" alt={selectedBook.title} />
+                                    <img src={selectedBook.cover} className="w-12 h-16 object-cover rounded-lg shadow-sm mr-4" alt={selectedBook.title} />
                                     <div>
                                         <h2 className="text-xl font-bold text-gray-900">{selectedBook.title}</h2>
                                         <p className="text-sm text-gray-500">{selectedBook.author}</p>
                                     </div>
                                 </div>
-                                <button onClick={() => setSelectedBook(null)} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition">
-                                    <ArrowLeft className="w-4 h-4 opacity-0" />
-                                    <span className="sr-only">Close</span>
+                                <button onClick={() => setSelectedBook(null)} className="p-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
                                         <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                                     </svg>
                                 </button>
                             </div>
 
-                            {/* Modal Content */}
                             <div className="p-8 overflow-y-auto custom-scrollbar leading-relaxed text-gray-700">
                                 <div dangerouslySetInnerHTML={{ __html: selectedBook.summary }} />
                             </div>
 
-                            {/* Modal Footer */}
-                            <div className="p-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl flex justify-end">
-                                <button onClick={() => setSelectedBook(null)} className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition shadow-md">
+                            <div className="p-4 border-t border-gray-100 bg-gray-50/50 backdrop-blur-xl rounded-b-3xl flex justify-end">
+                                <button onClick={() => setSelectedBook(null)} className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-bold hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg shadow-indigo-200">
                                     Close Summary
                                 </button>
                             </div>

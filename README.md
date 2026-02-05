@@ -1,4 +1,4 @@
-# Smart Digital Campus / College Hackathon Attendance
+# EdTrack / College Hackathon Attendance
 
 A comprehensive web application for managing college attendance and digital campus features, built for a hackathon. The system features a modern React frontend and a robust Node.js backend with AI integration.
 
@@ -10,6 +10,10 @@ A comprehensive web application for managing college attendance and digital camp
 - **AI Assistant**: Integrated AI chat (powered by Groq Llama 3) to assist students with queries.
 - **Classroom Management**: Digital tools for managing classes and subjects.
 - **File Uploads**: Support for submitting assignments and documents.
+
+## Architecture
+
+![EdTrack Architecture](assets/architecture_flowchart.png)
 
 ## Tech Stack
 
@@ -23,17 +27,26 @@ A comprehensive web application for managing college attendance and digital camp
 ### Server (Backend)
 - **Runtime**: Node.js
 - **Framework**: Express.js
-- **Database**: MongoDB (via Mongoose)
+- **Database**: SQLite (via Sequelize)
 - **Authentication**: JSON Web Token (JWT) + Bcrypt
 - **AI**: Groq SDK
 - **File Handling**: Multer
+
+## Application Visuals
+
+### Dashboard
+<!-- Insert dashboard screenshot here -->
+> *Dashboard visualization (user to add)*
+
+### Login Screen
+<!-- Insert login screenshot here -->
+> *Login screen visualization (user to add)*
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js (v18 or higher) installed
-- MongoDB connection string (Atlas or local)
 
 ### Installation
 
@@ -51,10 +64,10 @@ A comprehensive web application for managing college attendance and digital camp
     Create a `.env` file in the `server` directory with:
     ```env
     PORT=5000
-    MONGO_URI=your_mongodb_connection_string
     JWT_SECRET=your_jwt_secret
     GROQ_API_KEY=your_groq_api_key
     ```
+    *Note: The application uses a local SQLite database, so no external database configuration is required.*
 
 3.  **Setup Frontend:**
     ```bash
@@ -76,10 +89,10 @@ A comprehensive web application for managing college attendance and digital camp
     # In the client directory
     npm run dev
     ```
-    The application will actiavte on `http://localhost:5173` (or the port shown in terminal).
+    The application will activate on `http://localhost:5173` (or the port shown in terminal).
 
 ## Usage
 
 - Navigate to the frontend URL.
-- Register a new account or log in.
+- Register a new account or log in with demo credentials (see `server/seed_sqlite.js`).
 - Explore the dashboard, try the AI chat, or test the attendance features.

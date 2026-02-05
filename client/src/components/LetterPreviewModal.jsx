@@ -47,8 +47,8 @@ export default function LetterPreviewModal({ request, onClose, onAction, actionL
                         <p>Respected Sir/Madam,</p>
                         <p className="mt-4 indent-8">
                             I am writing to formally request {request.type === 'OD' ? 'On-Duty permission' : 'leave'}
-                            from <span className="font-semibold">{formatDate(request.dates[0])}</span>
-                            {request.dates.length > 1 ? <span> to <span className="font-semibold">{formatDate(request.dates[request.dates.length - 1])}</span></span> : ''}.
+                            from <span className="font-semibold">{formatDate(request.dates ? request.dates[0] : request.fromDate)}</span>
+                            {(request.dates && request.dates.length > 1) || (request.toDate && request.fromDate !== request.toDate) ? <span> to <span className="font-semibold">{formatDate(request.dates ? request.dates[request.dates.length - 1] : request.toDate)}</span></span> : ''}.
                         </p>
                         <p className="mt-2 indent-8">
                             {request.reason}
@@ -74,14 +74,14 @@ export default function LetterPreviewModal({ request, onClose, onAction, actionL
                         Close
                     </button>
                     <button
-                        onClick={() => onAction(request._id, 'Rejected')}
+                        onClick={() => onAction(request.id, 'Rejected')}
                         disabled={actionLoading}
                         className="px-4 py-2 bg-red-100 text-red-700 font-bold rounded-lg hover:bg-red-200 transition flex items-center text-sm disabled:opacity-50"
                     >
                         <XCircle className="w-4 h-4 mr-1" /> Reject
                     </button>
                     <button
-                        onClick={() => onAction(request._id, 'Approved')}
+                        onClick={() => onAction(request.id, 'Approved')}
                         disabled={actionLoading}
                         className="px-4 py-2 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 transition flex items-center text-sm disabled:opacity-50 shadow-sm"
                     >

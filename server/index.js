@@ -1,10 +1,16 @@
 const express = require('express');
-const mongoose = require('mongoose');
+
 const dotenv = require('dotenv');
+const path = require('path');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
-dotenv.config();
+// Load .env located alongside this file to avoid issues when server is started
+// from the repository root or another working directory.
+dotenv.config({ path: path.join(__dirname, '.env') });
+
+// Debug: confirm important env vars are loaded (remove in production)
+console.log('JWT_SECRET present:', !!process.env.JWT_SECRET);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -18,9 +24,15 @@ app.use(cors({
 }));
 
 // Database Connection
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('MongoDB Connected'))
-    .catch(err => console.error('MongoDB connection error:', err));
+const sequelize = require('./config/database');
+const models = require('./models'); // Load models to ensure they are defined
+
+// Sync Database
+sequelize.query("PRAGMA foreign_keys = OFF")
+    .then(() => sequelize.sync({ alter: true }))
+    .then(() => sequelize.query("PRAGMA foreign_keys = ON"))
+    .then(() => console.log('SQLite Connected & Database Synced'))
+    .catch(err => console.error('SQLite connection error:', err));
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
@@ -39,16 +51,26 @@ app.use('/api/chat', require('./routes/chatRoutes'));
 app.use('/api/marks', require('./routes/markRoutes'));
 app.use('/api/events', require('./routes/eventRoutes'));
 app.use('/api/announcements', require('./routes/announcementRoutes'));
+app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/fees', require('./modules/fees/routes'));
+app.use('/api/timetable', require('./modules/timetable/routes'));
+// Modular Fees Upgrade
 app.use('/uploads', express.static('uploads'));
 
 
 
 
+
 app.get('/', (req, res) => {
-    res.send('Smart Digital Campus API is running');
+    res.send('EdTrack API is running');
 });
 
 // Start Server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
+// Force keep-alive (Debug)
+setInterval(() => {
+    // console.log('Heartbeat...');
+}, 10000);

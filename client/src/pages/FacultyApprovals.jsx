@@ -51,10 +51,10 @@ export default function FacultyApprovals() {
 
             if (res.ok) {
                 // Refresh list
-                const updatedRequests = requests.filter(req => req._id !== id);
+                const updatedRequests = requests.filter(req => req.id !== id);
                 // If we are in 'All' view, we might update the status locally instead of removing
                 if (filter === 'All') {
-                    setRequests(requests.map(req => req._id === id ? { ...req, status } : req));
+                    setRequests(requests.map(req => req.id === id ? { ...req, status } : req));
                 } else {
                     setRequests(updatedRequests);
                 }
@@ -98,8 +98,8 @@ export default function FacultyApprovals() {
                             key={f}
                             onClick={() => setFilter(f)}
                             className={`px-4 py-2 rounded-lg text-sm font-bold transition ${filter === f
-                                    ? 'bg-emerald-600 text-white shadow-md'
-                                    : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                                ? 'bg-emerald-600 text-white shadow-md'
+                                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
                                 }`}
                         >
                             {f}
@@ -136,7 +136,7 @@ export default function FacultyApprovals() {
                                 </thead>
                                 <tbody className="divide-y divide-gray-50">
                                     {requests.map(req => (
-                                        <tr key={req._id} className="hover:bg-gray-50 transition-colors group">
+                                        <tr key={req.id} className="hover:bg-gray-50 transition-colors group">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center">
                                                     <div className="h-8 w-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold mr-3">
@@ -154,16 +154,29 @@ export default function FacultyApprovals() {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-sm text-gray-600">
-                                                {new Date(req.dates[0]).toLocaleDateString()}
-                                                {req.dates.length > 1 && ` +${req.dates.length - 1} days`}
+                                                {req.fromDate ? (
+                                                    <>
+                                                        {new Date(req.fromDate).toLocaleDateString()}
+                                                        {req.toDate && req.fromDate !== req.toDate && (
+                                                            <span className="text-xs text-gray-400 block">
+                                                                to {new Date(req.toDate).toLocaleDateString()}
+                                                            </span>
+                                                        )}
+                                                    </>
+                                                ) : req.dates && req.dates.length > 0 ? (
+                                                    <>
+                                                        {new Date(req.dates[0]).toLocaleDateString()}
+                                                        {req.dates.length > 1 && ` +${req.dates.length - 1} days`}
+                                                    </>
+                                                ) : 'N/A'}
                                             </td>
                                             <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate" title={req.reason}>
                                                 {req.reason}
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${req.status === 'Approved' ? 'bg-green-100 text-green-800' :
-                                                        req.status === 'Rejected' ? 'bg-red-100 text-red-800' :
-                                                            'bg-yellow-100 text-yellow-800'
+                                                    req.status === 'Rejected' ? 'bg-red-100 text-red-800' :
+                                                        'bg-yellow-100 text-yellow-800'
                                                     }`}>
                                                     {req.status}
                                                 </span>

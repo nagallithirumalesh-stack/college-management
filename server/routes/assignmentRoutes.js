@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const Assignment = require('../models/assignmentModel');
-const Submission = require('../models/submissionModel');
+const Assignment = require('../models/Assignment');
+const Submission = require('../models/Submission');
 const { protect } = require('../middleware/authMiddleware');
 const multer = require('multer');
+const { Op } = require('sequelize');
 
 // File Upload Config
 const storage = multer.diskStorage({
@@ -19,18 +20,17 @@ router.post('/', protect, upload.single('file'), async (req, res) => {
     try {
         const { title, description, subjectId, dueDate, maxMarks } = req.body;
 
-        const assignment = new Assignment({
+        const assignment = await Assignment.create({
             title,
             description,
-            subject: subjectId,
-            faculty: req.user.id,
+            subjectId,
+            facultyId: req.user.id,
             dueDate: new Date(dueDate),
             maxMarks: maxMarks || 100,
             fileUrl: req.file ? req.file.path : null
         });
 
-        const savedAssignment = await assignment.save();
-        res.status(201).json(savedAssignment);
+        res.status(201).json(assignment);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -40,19 +40,24 @@ router.post('/', protect, upload.single('file'), async (req, res) => {
 // @route   GET /api/assignments/subject/:subjectId
 router.get('/subject/:subjectId', protect, async (req, res) => {
     try {
-        const assignments = await Assignment.find({ subject: req.params.subjectId })
-            .sort({ dueDate: 1 });
+        const assignments = await Assignment.findAll({
+            where: { subjectId: req.params.subjectId },
+            order: [['dueDate', 'ASC']]
+        });
 
         // Include submission status if Student
         if (req.user.role === 'student') {
-            const submissions = await Submission.find({
-                student: req.user.id,
-                assignment: { $in: assignments.map(a => a._id) }
+            const assignmentIds = assignments.map(a => a.id);
+            const submissions = await Submission.findAll({
+                where: {
+                    studentId: req.user.id,
+                    assignmentId: { [Op.in]: assignmentIds }
+                }
             });
 
             const result = assignments.map(a => {
-                const sub = submissions.find(s => s.assignment.toString() === a._id.toString());
-                return { ...a.toObject(), submission: sub || null };
+                const sub = submissions.find(s => s.assignmentId === a.id);
+                return { ...a.toJSON(), submission: sub || null };
             });
             return res.json(result);
         }
@@ -73,17 +78,18 @@ router.post('/submit', protect, upload.single('file'), async (req, res) => {
         if (!req.file) return res.status(400).json({ message: 'File is required' });
 
         // Check if already submitted
-        const existing = await Submission.findOne({ assignment: assignmentId, student: req.user.id });
+        const existing = await Submission.findOne({
+            where: { assignmentId, studentId: req.user.id }
+        });
         if (existing) return res.status(400).json({ message: 'Already submitted' });
 
-        const submission = new Submission({
-            assignment: assignmentId,
-            student: req.user.id,
+        const submission = await Submission.create({
+            assignmentId,
+            studentId: req.user.id,
             fileUrl: req.file.path
         });
 
-        const savedSubmission = await submission.save();
-        res.status(201).json(savedSubmission);
+        res.status(201).json(submission);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -94,9 +100,11 @@ router.post('/submit', protect, upload.single('file'), async (req, res) => {
 // @access  Faculty
 router.get('/submissions/:assignmentId', protect, async (req, res) => {
     try {
-        const submissions = await Submission.find({ assignment: req.params.assignmentId })
-            .populate('student', 'name email')
-            .sort({ submittedAt: 1 });
+        const submissions = await Submission.findAll({
+            where: { assignmentId: req.params.assignmentId },
+            include: ['student'], // Alias defined in Submission.associate? 'student'
+            order: [['submittedAt', 'ASC']]
+        });
         res.json(submissions);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -110,7 +118,7 @@ router.patch('/submissions/:id/grade', protect, async (req, res) => {
     try {
         const { grade, feedback } = req.body;
 
-        const submission = await Submission.findById(req.params.id);
+        const submission = await Submission.findByPk(req.params.id);
         if (!submission) return res.status(404).json({ message: 'Submission not found' });
 
         submission.grade = grade;

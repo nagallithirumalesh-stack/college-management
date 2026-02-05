@@ -1,21 +1,32 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
-const announcementSchema = new mongoose.Schema({
-    title: { type: String, required: true },
-    content: { type: String, required: true },
+const Announcement = sequelize.define('Announcement', {
+    title: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    content: {
+        type: DataTypes.TEXT, // Using TEXT for longer content
+        allowNull: false,
+    },
     type: {
-        type: String,
-        enum: ['Circular', 'Event', 'News', 'Alert'],
-        default: 'Circular'
+        type: DataTypes.ENUM('Circular', 'Event', 'News', 'Alert'),
+        defaultValue: 'Circular',
     },
     targetAudience: {
-        type: String,
-        enum: ['All', 'Student', 'Faculty'],
-        default: 'All'
+        type: DataTypes.ENUM('All', 'Student', 'Faculty'),
+        defaultValue: 'All',
     },
-    department: { type: String }, // Optional: If specific to a dept
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    createdAt: { type: Date, default: Date.now }
+    department: {
+        type: DataTypes.STRING,
+    },
+}, {
+    timestamps: true
 });
 
-module.exports = mongoose.model('Announcement', announcementSchema);
+Announcement.associate = (models) => {
+    Announcement.belongsTo(models.User, { as: 'createdBy', foreignKey: 'createdById' });
+};
+
+module.exports = Announcement;

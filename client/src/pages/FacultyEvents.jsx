@@ -88,7 +88,7 @@ export default function FacultyEvents() {
             <div className="flex-1 max-w-5xl w-full mx-auto px-4 py-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {events.map((event) => (
-                        <div key={event._id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
+                        <div key={event.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
                             <div className={`h-2 w-full ${event.status === 'Approved' ? 'bg-emerald-500' : 'bg-orange-400'}`}></div>
                             <div className="p-5">
                                 <div className="flex justify-between items-start mb-2">

@@ -1,16 +1,39 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
-const AttendanceSessionSchema = new mongoose.Schema({
-    subject: { type: mongoose.Schema.Types.ObjectId, ref: 'Subject', required: true },
-    faculty: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    qrCode: { type: String, required: true }, // Unique session token
-    active: { type: Boolean, default: true },
-    geofence: {
-        latitude: { type: Number, required: true },
-        longitude: { type: Number, required: true },
-        radius: { type: Number, default: 200 } // Meters
+const AttendanceSession = sequelize.define('AttendanceSession', {
+    date: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
     },
-    expiresAt: { type: Date, required: true, index: { expires: '1d' } } // Auto-delete after 1 day cleanup
-}, { timestamps: true });
+    type: {
+        type: DataTypes.ENUM('QR', 'MANUAL'),
+        defaultValue: 'QR',
+    },
+    startTime: {
+        type: DataTypes.DATE,
+    },
+    endTime: {
+        type: DataTypes.DATE,
+    },
+    isActive: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
+    },
+    location: {
+        type: DataTypes.JSON, // { lat, long, radius }
+    },
+    qrCode: {
+        type: DataTypes.TEXT, // Encrypted string or URL
+    },
+}, {
+    timestamps: true
+});
 
-module.exports = mongoose.model('AttendanceSession', AttendanceSessionSchema);
+AttendanceSession.associate = (models) => {
+    AttendanceSession.belongsTo(models.Subject, { foreignKey: 'subjectId', as: 'subject' });
+    AttendanceSession.belongsTo(models.User, { foreignKey: 'facultyId', as: 'faculty' });
+    AttendanceSession.hasMany(models.AttendanceRecord, { foreignKey: 'sessionId', as: 'records' });
+};
+
+module.exports = AttendanceSession;

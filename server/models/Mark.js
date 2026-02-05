@@ -1,11 +1,26 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
-const MarkSchema = new mongoose.Schema({
-    student: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    subject: { type: mongoose.Schema.Types.ObjectId, ref: 'Subject', required: true },
-    assessmentType: { type: String, required: true }, // Mid-1, Assignment-1, Lab, etc.
-    score: { type: Number, required: true },
-    maxScore: { type: Number, required: true },
-}, { timestamps: true });
+const Mark = sequelize.define('Mark', {
+    examType: {
+        type: DataTypes.STRING, // Midsem 1, Final, etc.
+        allowNull: false,
+    },
+    marksObtained: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+    maxMarks: {
+        type: DataTypes.INTEGER,
+        defaultValue: 100,
+    },
+}, {
+    timestamps: true
+});
 
-module.exports = mongoose.model('Mark', MarkSchema);
+Mark.associate = (models) => {
+    Mark.belongsTo(models.User, { foreignKey: 'studentId', as: 'student' });
+    Mark.belongsTo(models.Subject, { foreignKey: 'subjectId', as: 'subject' });
+};
+
+module.exports = Mark;

@@ -1,54 +1,56 @@
 const PerformanceMetric = require('../models/PerformanceMetric');
 const AttendanceRecord = require('../models/AttendanceRecord');
-const Submission = require('../models/submissionModel');
-const Assignment = require('../models/assignmentModel');
+const AttendanceSession = require('../models/AttendanceSession');
+const Submission = require('../models/Submission');
+const Assignment = require('../models/Assignment');
 const Note = require('../models/Note');
 
 exports.getStudentAnalytics = async (req, res) => {
     try {
-        const studentId = req.user.userId;
+        const studentId = req.user.id; // Corrected from userId
 
         // 1. Calculate Attendance %
-        // In a real app, we'd count total sessions for their subjects. 
-        // For now, we take total sessions marked vs total existing sessions (simplified).
-        const totalSessions = await mongoose.model('AttendanceSession').countDocuments(); // Ideally filtered by subject
-        const attended = await AttendanceRecord.countDocuments({ student: studentId, status: 'present' });
+        const totalSessions = await AttendanceSession.count(); // Ideally filtered by subject
+        const attended = await AttendanceRecord.count({
+            where: { studentId: studentId, status: 'present' }
+        });
         const attendancePct = totalSessions > 0 ? (attended / totalSessions) * 100 : 100;
 
         // 2. Average Assignment Marks
-        const submissions = await Submission.find({ student: studentId, status: 'Graded' });
+        const submissions = await Submission.findAll({
+            where: { studentId: studentId, status: 'Graded' }
+        });
         let totalMarks = 0;
-        let maxTotal = 0;
 
-        // Simple Average (ignoring different max marks per assignment for simplicity, just average raw score)
-        // Better: (Total Obtained / Total Possible) * 100
         if (submissions.length > 0) {
             for (let sub of submissions) {
                 totalMarks += sub.grade || 0;
-                // Ideally fetch assignment max marks, but assuming 100 or stored on submission
             }
-            // Let's count avg raw marks for now
         }
         const avgMarks = submissions.length > 0 ? (totalMarks / submissions.length) : 0;
 
         // 3. Participation (Notes Uploaded)
-        const notesCount = await Note.countDocuments({ uploadedBy: studentId });
+        const notesCount = await Note.count({ where: { uploadedById: studentId } });
         const partScore = notesCount * 10; // 10 points per note
 
         // 4. Update/Create Metric
-        let metric = await PerformanceMetric.findOne({ student: studentId });
+        let metric = await PerformanceMetric.findOne({ where: { studentId: studentId } });
+
         if (!metric) {
-            metric = new PerformanceMetric({ student: studentId });
+            metric = await PerformanceMetric.create({
+                studentId: studentId,
+                attendancePercentage: Math.round(attendancePct),
+                cpa: Math.round(avgMarks) / 10, // Assuming CPA is roughly related to marks
+                creditsEarned: partScore // Mapping logic
+            });
+        } else {
+            metric.attendancePercentage = Math.round(attendancePct);
+            // metric.avgAssignmentMarks = Math.round(avgMarks); // Model doesn't have this field?
+            // Refactored model has: cpa, attendancePercentage, creditsEarned
+            metric.cpa = Math.round(avgMarks) / 10;
+            metric.creditsEarned = partScore; // Using credits as score holder
+            await metric.save();
         }
-
-        metric.attendancePercentage = Math.round(attendancePct);
-        metric.avgAssignmentMarks = Math.round(avgMarks);
-        metric.participationScore = partScore;
-
-        // Add history point (daily snapshot logic would go here)
-        // metric.history.push({ score: (attendancePct + avgMarks)/2 });
-
-        await metric.save();
 
         res.json(metric);
 
@@ -56,5 +58,3 @@ exports.getStudentAnalytics = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
-const mongoose = require('mongoose');

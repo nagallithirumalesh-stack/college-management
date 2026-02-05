@@ -7,7 +7,10 @@ const { protect } = require('../middleware/authMiddleware');
 // @route   GET /api/todos
 router.get('/', protect, async (req, res) => {
     try {
-        const todos = await Todo.find({ user: req.user.id }).sort({ createdAt: -1 });
+        const todos = await Todo.findAll({
+            where: { userId: req.user.id },
+            order: [['createdAt', 'DESC']]
+        });
         res.json(todos);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -20,8 +23,8 @@ router.post('/', protect, async (req, res) => {
     try {
         const { text } = req.body;
         const todo = await Todo.create({
-            user: req.user.id,
-            text
+            userId: req.user.id,
+            task: text
         });
         res.status(201).json(todo);
     } catch (err) {
@@ -33,10 +36,10 @@ router.post('/', protect, async (req, res) => {
 // @route   PUT /api/todos/:id
 router.put('/:id', protect, async (req, res) => {
     try {
-        const todo = await Todo.findById(req.params.id);
+        const todo = await Todo.findByPk(req.params.id);
         if (!todo) return res.status(404).json({ message: 'Todo not found' });
 
-        if (todo.user.toString() !== req.user.id) {
+        if (todo.userId !== req.user.id) {
             return res.status(401).json({ message: 'Not authorized' });
         }
 
@@ -52,14 +55,14 @@ router.put('/:id', protect, async (req, res) => {
 // @route   DELETE /api/todos/:id
 router.delete('/:id', protect, async (req, res) => {
     try {
-        const todo = await Todo.findById(req.params.id);
+        const todo = await Todo.findByPk(req.params.id);
         if (!todo) return res.status(404).json({ message: 'Todo not found' });
 
-        if (todo.user.toString() !== req.user.id) {
+        if (todo.userId !== req.user.id) {
             return res.status(401).json({ message: 'Not authorized' });
         }
 
-        await todo.deleteOne();
+        await todo.destroy();
         res.json({ message: 'Todo removed' });
     } catch (err) {
         res.status(500).json({ message: err.message });

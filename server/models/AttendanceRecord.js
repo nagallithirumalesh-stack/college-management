@@ -1,19 +1,32 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
-const AttendanceRecordSchema = new mongoose.Schema({
-    session: { type: mongoose.Schema.Types.ObjectId, ref: 'AttendanceSession', required: true },
-    student: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    status: { type: String, enum: ['present', 'absent'], default: 'present' },
-    locationVerified: { type: Boolean, default: false },
-    locationData: { // Snapshot of where they were
-        latitude: Number,
-        longitude: Number,
-        distance: Number
+const AttendanceRecord = sequelize.define('AttendanceRecord', {
+    status: {
+        type: DataTypes.ENUM('present', 'absent', 'late'),
+        defaultValue: 'present',
     },
-    deviceInfo: { type: String }
-}, { timestamps: true });
+    timestamp: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+    },
+    deviceInfo: {
+        type: DataTypes.JSON, // { deviceId, ip, etc }
+    },
+    verificationMethod: {
+        type: DataTypes.ENUM('qr', 'manual', 'face'),
+        defaultValue: 'qr',
+    },
+    distanceMetadata: {
+        type: DataTypes.JSON, // { distance, allowedRadius, units }
+    },
+}, {
+    timestamps: true
+});
 
-// Prevent duplicate attendance for same session
-AttendanceRecordSchema.index({ session: 1, student: 1 }, { unique: true });
+AttendanceRecord.associate = (models) => {
+    AttendanceRecord.belongsTo(models.AttendanceSession, { foreignKey: 'sessionId', as: 'session' });
+    AttendanceRecord.belongsTo(models.User, { foreignKey: 'studentId', as: 'student' });
+};
 
-module.exports = mongoose.model('AttendanceRecord', AttendanceRecordSchema);
+module.exports = AttendanceRecord;

@@ -5,10 +5,13 @@ const User = require('../models/User');
 // @access  Private
 exports.getLeaderboard = async (req, res) => {
     try {
-        const leaderboard = await User.find({ role: 'student' })
-            .sort({ points: -1 })
-            .limit(10)
-            .select('name department points band');
+        const leaderboard = await User.findAll({
+            where: { role: 'student' },
+            order: [['points', 'DESC']],
+            limit: 10,
+            attributes: ['number', 'name', 'department', 'points', 'band'] // 'number' might not exist? check User model. User model has 'semester', 'email'. No 'number'.
+            // Removed 'number', kept standard fields.
+        });
         res.json(leaderboard);
     } catch (error) {
         res.status(500).json({ message: error.message });

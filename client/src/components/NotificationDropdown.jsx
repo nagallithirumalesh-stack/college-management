@@ -47,7 +47,7 @@ export default function NotificationDropdown() {
 
     const markAsRead = async (id, link) => {
         // Optimistic update
-        setNotifications(prev => prev.map(n => n._id === id ? { ...n, read: true } : n));
+        setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
         setUnreadCount(prev => Math.max(0, prev - 1));
 
         try {
@@ -121,8 +121,8 @@ export default function NotificationDropdown() {
                         ) : (
                             notifications.map(note => (
                                 <div
-                                    key={note._id}
-                                    onClick={() => markAsRead(note._id, note.relatedLink)}
+                                    key={note.id}
+                                    onClick={() => markAsRead(note.id, note.relatedLink)}
                                     className={`px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-start space-x-3 transition border-b border-gray-50 last:border-0 ${!note.read ? 'bg-indigo-50/30' : ''}`}
                                 >
                                     <div className="mt-0.5 flex-shrink-0">

@@ -1,5 +1,6 @@
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { ArrowLeft, User, Mail, BookOpen, Award, Shield, LogOut, Camera, Sparkles } from 'lucide-react';
+import { ArrowLeft, User, Mail, BookOpen, Award, Shield, LogOut, Camera, Sparkles, MapPin, Calendar, Smartphone, QrCode, Fingerprint, CheckSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Profile() {
@@ -33,14 +34,53 @@ export default function Profile() {
         }
     };
 
-    // 1. Loading State
+    const [uploading, setUploading] = useState(false);
+    const fileInputRef = React.useRef(null);
+    const [profilePhoto, setProfilePhoto] = useState(user?.profilePhoto || null);
+
+    const handlePhotoClick = () => {
+        fileInputRef.current.click();
+    };
+
+    const handleFileChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('photo', file);
+
+        setUploading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('http://localhost:5000/api/auth/profile/photo', {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                setProfilePhoto(data.photoUrl);
+                alert('Profile photo updated successfully!');
+            } else {
+                alert(data.message || 'Upload failed');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error uploaded photo');
+        } finally {
+            setUploading(false);
+        }
+    };
+
     if (!user) return (
-        <div className="min-h-screen flex items-center justify-center text-indigo-600 font-bold animate-pulse">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 text-indigo-600 font-bold animate-pulse">
             Loading profile...
         </div>
     );
 
-    // 2. Safe Data Extraction (Prevents crashes if fields are missing)
     const name = user.name || 'User';
     const email = user.email || '';
     const username = user.username || (email && email.includes('@') ? email.split('@')[0] : 'user');
@@ -50,183 +90,231 @@ export default function Profile() {
     const points = user.points || 0;
     const band = user.band || 'Bronze';
     const isIdentityVerified = !!user.isIdentityVerified;
-    const userId = user._id || 'unknown';
-
-    const getRoleBadgeColor = (r) => {
-        switch (r) {
-            case 'student': return 'bg-indigo-100 text-indigo-700 border-indigo-200';
-            case 'faculty': return 'bg-purple-100 text-purple-700 border-purple-200';
-            case 'admin': return 'bg-red-100 text-red-700 border-red-200';
-            default: return 'bg-gray-100 text-gray-700';
-        }
-    };
+    const userId = String(user.id || 'unknown');
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-indigo-50 font-sans pb-12">
-            {/* Navbar / Header Area */}
-            <div className="bg-white/80 backdrop-blur-md sticky top-0 z-10 border-b border-gray-200/50">
-                <div className="max-w-4xl mx-auto px-6 h-16 flex items-center">
+        <div className="min-h-screen bg-[#f8fafc] font-sans pb-12 relative overflow-hidden">
+            {/* Ambient Background */}
+            <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 rounded-b-[3rem] shadow-2xl"></div>
+            <div className="absolute top-20 right-20 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute top-40 left-10 w-96 h-96 bg-indigo-400/20 rounded-full blur-3xl"></div>
+
+            {/* Navbar */}
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+                <button
+                    onClick={() => navigate(-1)}
+                    className="flex items-center text-white/90 hover:text-white bg-white/10 hover:bg-white/20 backdrop-blur-md px-4 py-2 rounded-full transition-all"
+                >
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    <span className="text-sm font-medium">Back to Dashboard</span>
+                </button>
+                <div className="flex items-center space-x-4">
                     <button
-                        onClick={() => navigate(-1)}
-                        className="flex items-center text-gray-500 hover:text-indigo-600 transition-colors group"
+                        onClick={handleLogout}
+                        className="flex items-center text-red-100 hover:text-white bg-red-500/20 hover:bg-red-500/30 backdrop-blur-md px-4 py-2 rounded-full transition-all border border-red-500/30"
                     >
-                        <div className="p-2 rounded-full group-hover:bg-indigo-50 transition-colors">
-                            <ArrowLeft className="w-5 h-5" />
-                        </div>
-                        <span className="font-medium ml-1">Back</span>
+                        <LogOut className="w-4 h-4 mr-2" />
+                        <span className="text-sm font-medium">Sign Out</span>
                     </button>
-                    <h1 className="ml-auto text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
-                        My Profile
-                    </h1>
                 </div>
             </div>
 
-            <div className="max-w-4xl mx-auto px-6 mt-8">
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-                {/* Main Profile Card */}
-                <div className="bg-white rounded-3xl shadow-xl shadow-indigo-100/50 overflow-hidden border border-white/50 relative">
+                    {/* Left Column: ID Card & Quick Actions */}
+                    <div className="lg:col-span-4 space-y-6">
+                        {/* Digital ID Card */}
+                        <div className="bg-white/90 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/50 relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
+                            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
 
-                    {/* Decorative Background Pattern */}
-                    <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
-                        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
-                        <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-                        <div className="absolute top-10 -left-10 w-48 h-48 bg-purple-500/20 rounded-full blur-2xl"></div>
+                            <div className="flex flex-col items-center">
+
+                                <div className="relative mb-4 group/avatar cursor-pointer" onClick={handlePhotoClick}>
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                    />
+                                    <div className="w-32 h-32 rounded-full p-1 bg-gradient-to-tr from-indigo-500 to-purple-500 shadow-lg relative">
+                                        <img
+                                            src={profilePhoto || `https://ui-avatars.com/api/?name=${name}&background=fff&color=4f46e5&size=128&bold=true`}
+                                            alt={name}
+                                            className={`w-full h-full rounded-full object-cover border-4 border-white transition-opacity ${uploading ? 'opacity-50' : 'opacity-100'}`}
+                                        />
+                                        {uploading && (
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                                            </div>
+                                        )}
+                                        {/* Hover Overlay */}
+                                        <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
+                                            <Camera className="w-8 h-8 text-white" />
+                                        </div>
+                                    </div>
+                                    <div className="absolute bottom-1 right-1 bg-emerald-500 text-white p-1.5 rounded-full border-2 border-white shadow-sm z-10" title="Active Student">
+                                        <CheckSquare className="w-3 h-3" />
+                                    </div>
+                                </div>
+
+                                <h2 className="text-2xl font-bold text-gray-900 text-center">{name}</h2>
+                                <p className="text-indigo-600 font-medium text-sm mb-4">@{username}</p>
+
+                                <div className="w-full space-y-3 pt-4 border-t border-gray-100">
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="text-gray-500 flex items-center"><User className="w-4 h-4 mr-2" /> Role</span>
+                                        <span className="font-semibold text-gray-900 capitalize bg-gray-100 px-2 py-0.5 rounded text-xs">{role}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="text-gray-500 flex items-center"><Mail className="w-4 h-4 mr-2" /> Email</span>
+                                        <span className="font-semibold text-gray-900 truncate max-w-[150px]">{email}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="text-gray-500 flex items-center"><Fingerprint className="w-4 h-4 mr-2" /> ID</span>
+                                        <span className="font-mono text-xs text-gray-400">{userId.substring(0, 8)}...</span>
+                                    </div>
+                                </div>
+
+                                <div className="mt-6 w-full">
+                                    <div className="p-3 bg-gray-50 rounded-xl border border-dashed border-gray-300 flex items-center justify-center">
+                                        <QrCode className="w-12 h-12 text-gray-400 opacity-50" />
+                                        <div className="ml-3 text-xs text-gray-400">
+                                            <p className="font-medium">Digital Campus ID</p>
+                                            <p>Scan for access</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Security Card */}
+                        <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100">
+                            <h3 className="font-bold text-gray-900 flex items-center mb-4">
+                                <Shield className="w-5 h-5 mr-2 text-emerald-500" /> Security
+                            </h3>
+
+                            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl mb-4">
+                                <div>
+                                    <p className="text-sm font-semibold text-gray-900">Face Identity</p>
+                                    <p className="text-xs text-gray-500">{isIdentityVerified ? 'Biometrics enrolled' : 'Not configured'}</p>
+                                </div>
+                                {isIdentityVerified ? (
+                                    <div className="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center">
+                                        <Fingerprint className="w-5 h-5" />
+                                    </div>
+                                ) : (
+                                    <div className="w-8 h-8 bg-gray-200 text-gray-400 rounded-lg flex items-center justify-center">
+                                        <Fingerprint className="w-5 h-5" />
+                                    </div>
+                                )}
+                            </div>
+
+                            {!isIdentityVerified && (
+                                <button
+                                    onClick={handleEnrollIdentity}
+                                    className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-sm transition-colors flex items-center justify-center shadow-lg shadow-indigo-200"
+                                >
+                                    <Camera className="w-4 h-4 mr-2" /> Setup Face ID
+                                </button>
+                            )}
+                        </div>
                     </div>
 
-                    <div className="relative px-8 pt-24 pb-12">
-                        {/* Avatar Image */}
-                        <div className="absolute -top-16 left-8">
-                            <div className="relative group">
-                                <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg bg-white overflow-hidden flex items-center justify-center text-5xl font-bold text-indigo-600">
-                                    <img
-                                        src={`https://ui-avatars.com/api/?name=${name}&background=6366f1&color=fff&size=128&bold=true`}
-                                        alt={name}
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                                <button className="absolute bottom-1 right-1 p-2 bg-gray-900/80 text-white rounded-full hover:bg-black transition shadow-sm opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 duration-200">
-                                    <Camera className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </div>
+                    {/* Right Column: Stats & Details */}
+                    <div className="lg:col-span-8 space-y-6">
 
-                        {/* Name & Role */}
-                        <div className="ml-40 pt-2 flex flex-col md:flex-row md:items-center justify-between">
-                            <div>
-                                <h2 className="text-3xl font-black text-gray-900 tracking-tight">{name}</h2>
-                                <div className="flex items-center mt-2 space-x-3">
-                                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${getRoleBadgeColor(role)}`}>
-                                        {role}
-                                    </span>
-                                    <span className="text-gray-500 text-sm font-medium flex items-center">
-                                        <Mail className="w-4 h-4 mr-1.5 text-gray-400" />
-                                        {email || 'No Email'}
-                                    </span>
+                        {/* Stats Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="bg-white rounded-3xl p-6 shadow-lg border-l-4 border-indigo-500 flex items-center justify-between group hover:-translate-y-1 transition-transform">
+                                <div>
+                                    <p className="text-sm font-medium text-gray-500">Academic Standing</p>
+                                    <h3 className="text-2xl font-black text-gray-900 mt-1">{department}</h3>
+                                    <p className="text-xs text-indigo-500 font-semibold mt-1">Semester {semester}</p>
                                 </div>
-                            </div>
-                            <div className="mt-4 md:mt-0">
-                                <button onClick={handleLogout} className="px-5 py-2.5 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 font-semibold rounded-xl text-sm transition-all flex items-center shadow-sm border border-red-100">
-                                    <LogOut className="w-4 h-4 mr-2" />
-                                    Sign Out
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Content Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
-
-                            {/* Academic Details - Premium Card */}
-                            <div className="group bg-slate-50 hover:bg-white p-6 rounded-2xl border border-slate-200/60 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-300">
-                                <div className="flex items-center mb-6">
-                                    <div className="p-3 bg-indigo-100 text-indigo-600 rounded-xl group-hover:scale-110 transition-transform">
-                                        <BookOpen className="w-6 h-6" />
-                                    </div>
-                                    <h3 className="ml-4 text-lg font-bold text-gray-800">Academic Profile</h3>
-                                </div>
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-100 shadow-sm">
-                                        <span className="text-sm font-medium text-slate-500 uppercase tracking-wide">Department</span>
-                                        <span className="text-base font-bold text-slate-800">{department}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-100 shadow-sm">
-                                        <span className="text-sm font-medium text-slate-500 uppercase tracking-wide">
-                                            {role === 'faculty' ? 'Designation' : 'Current Semester'}
-                                        </span>
-                                        <span className="text-base font-bold text-slate-800">
-                                            {role === 'faculty' ? 'Professor' : `Sem ${semester}`}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-100 shadow-sm">
-                                        <span className="text-sm font-medium text-slate-500 uppercase tracking-wide">Username</span>
-                                        <span className="text-base font-bold text-slate-800 font-mono">@{username}</span>
-                                    </div>
+                                <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
+                                    <BookOpen className="w-6 h-6" />
                                 </div>
                             </div>
 
-                            {/* Gamification / Stats - Premium Card */}
                             {role === 'student' && (
-                                <div className="group bg-gradient-to-br from-amber-50 to-orange-50 hover:from-white hover:to-white p-6 rounded-2xl border border-amber-100 hover:border-amber-200 hover:shadow-lg hover:shadow-amber-500/10 transition-all duration-300">
-                                    <div className="flex items-center mb-6">
-                                        <div className="p-3 bg-amber-100 text-amber-600 rounded-xl group-hover:scale-110 group-hover:rotate-12 transition-transform">
-                                            <Award className="w-6 h-6" />
-                                        </div>
-                                        <h3 className="ml-4 text-lg font-bold text-gray-800">Achievements</h3>
+                                <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-3xl p-6 shadow-lg shadow-orange-200 text-white flex items-center justify-between group hover:-translate-y-1 transition-transform">
+                                    <div>
+                                        <p className="text-orange-100 text-sm font-medium">Gamification Rank</p>
+                                        <h3 className="text-3xl font-black mt-1">{band}</h3>
+                                        <p className="text-orange-100 text-xs font-semibold mt-1 flex items-center">
+                                            <Sparkles className="w-3 h-3 mr-1" /> {points} XP Earned
+                                        </p>
                                     </div>
-                                    <div className="flex gap-4">
-                                        <div className="flex-1 bg-white p-4 rounded-xl border border-amber-100/50 shadow-sm text-center transform hover:-translate-y-1 transition-transform">
-                                            <p className="text-xs font-bold text-amber-500 uppercase">Rank Band</p>
-                                            <p className="text-2xl font-black text-gray-800 mt-1">{band}</p>
-                                        </div>
-                                        <div className="flex-1 bg-white p-4 rounded-xl border border-amber-100/50 shadow-sm text-center transform hover:-translate-y-1 transition-transform delay-75">
-                                            <p className="text-xs font-bold text-amber-500 uppercase">XP Points</p>
-                                            <p className="text-2xl font-black text-gray-800 mt-1">{points}</p>
-                                        </div>
-                                    </div>
-                                    <div className="mt-4 p-3 bg-white/60 rounded-lg text-xs text-amber-800 text-center font-medium border border-amber-100">
-                                        <Sparkles className="w-3 h-3 inline mr-1" />
-                                        You are top 15% in your class!
+                                    <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-white group-hover:rotate-12 transition-transform">
+                                        <Award className="w-8 h-8" />
                                     </div>
                                 </div>
                             )}
-
                         </div>
 
-                        {/* Security Section - Full Width */}
-                        <div className="mt-8">
-                            <div className="bg-white p-1 rounded-2xl border border-gray-100 shadow-sm">
-                                <div className="bg-slate-50 p-6 rounded-xl flex flex-col md:flex-row items-center justify-between group hover:bg-slate-100/80 transition-colors">
-                                    <div className="flex items-center mb-4 md:mb-0">
-                                        <div className="p-3 bg-emerald-100 text-emerald-600 rounded-xl mr-4">
-                                            <Shield className="w-6 h-6" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-lg font-bold text-gray-800">AI Security</h3>
-                                            <p className="text-sm text-gray-500">Manage your Face Identity for secure campus access.</p>
-                                        </div>
+                        {/* Detailed Info */}
+                        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+                            <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center">
+                                <h3 className="font-bold text-lg text-gray-900">Personal Information</h3>
+                                <button className="text-sm text-indigo-600 font-medium hover:text-indigo-700">Edit Details</button>
+                            </div>
+                            <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-12">
+                                <div>
+                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Full Name</label>
+                                    <div className="flex items-center text-gray-900 font-medium">
+                                        <User className="w-5 h-5 mr-3 text-indigo-500" /> {name}
                                     </div>
-
-                                    {isIdentityVerified ? (
-                                        <div className="flex items-center px-4 py-2 bg-emerald-100 text-emerald-700 rounded-xl font-bold border border-emerald-200">
-                                            <Shield className="w-4 h-4 mr-2" /> Verified ID Active
-                                        </div>
-                                    ) : (
-                                        <button
-                                            onClick={handleEnrollIdentity}
-                                            className="px-6 py-3 bg-indigo-600 from-indigo-600 to-purple-600 bg-gradient-to-r hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/30 transform hover:scale-105 transition-all flex items-center"
-                                        >
-                                            <Camera className="w-4 h-4 mr-2" /> Enroll Face ID
-                                        </button>
-                                    )}
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Username</label>
+                                    <div className="flex items-center text-gray-900 font-medium">
+                                        <Smartphone className="w-5 h-5 mr-3 text-indigo-500" /> @{username}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Email Address</label>
+                                    <div className="flex items-center text-gray-900 font-medium">
+                                        <Mail className="w-5 h-5 mr-3 text-indigo-500" /> {email}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Campus Status</label>
+                                    <div className="flex items-center text-emerald-600 font-medium">
+                                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-3 animate-pulse"></span> Active
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Department</label>
+                                    <div className="flex items-center text-gray-900 font-medium">
+                                        <BookOpen className="w-5 h-5 mr-3 text-indigo-500" /> {department}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Joined Date</label>
+                                    <div className="flex items-center text-gray-900 font-medium">
+                                        <Calendar className="w-5 h-5 mr-3 text-indigo-500" /> September 2023
+                                    </div>
                                 </div>
                             </div>
+                        </div>
+
+                        <div className="bg-indigo-900 rounded-3xl p-8 text-white relative overflow-hidden">
+                            <div className="relative z-10 flex justify-between items-center">
+                                <div>
+                                    <h3 className="text-xl font-bold mb-2">Need Help?</h3>
+                                    <p className="text-indigo-200 text-sm max-w-md">Contact the administration if you need to update any locked information in your profile.</p>
+                                </div>
+                                <button className="px-5 py-2 bg-white text-indigo-900 rounded-xl font-bold text-sm hover:bg-indigo-50 transition-colors">
+                                    Contact Admin
+                                </button>
+                            </div>
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
                         </div>
 
                     </div>
                 </div>
-
-                <p className="text-center text-gray-400 text-xs mt-12 mb-8">
-                    SmartCampus ID: {userId} • v2.4.0
-                </p>
             </div>
         </div>
     );

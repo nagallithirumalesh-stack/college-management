@@ -1,58 +1,62 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const { protect } = require('../middleware/authMiddleware');
 const controller = require('../controllers/attendanceController');
+const AttendanceSession = require('../models/AttendanceSession');
+const AttendanceRecord = require('../models/AttendanceRecord');
+const Subject = require('../models/Subject');
+const { Op } = require('sequelize');
+
+// Configure multer for image upload
+const storage = multer.memoryStorage();
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed'));
+        }
+    }
+});
 
 // Student Stats
 router.get('/stats/:studentId', protect, async (req, res) => {
-    // Keep existing inline stats logic or move to controller if preferred. 
-    // For now, let's keep the existing complex stats aggregation here or import if moved.
-    // The controller didn't have this specific "stats" method in the view I saw, 
-    // so I will leave this inline block OR check if I should move it. 
-    // The user wants "how much student has attendance". 
-    // Let's assume the inline logic from step 1906 is good for /stats/:studentId.
-    // BUT I need to add the other routes.
-
-    // Actually, to avoid mixing, let's just add the new routes and keep stats inline for now unless I see a conflict.
-    // Wait, I can't overwrite the file easily if I don't provide the full content or precise range.
-    // I'll replace the whole file to clean it up and map everything.
-
-    // However, I need to make sure the "stats" logic is preserved if it's not in controller.
-    // Controller has: startSession, markAttendance, getReport.
-    // It DOES NOT have getStudentStats.
-
-    // So I will:
-    // 1. Mount controller methods.
-    // 2. Keep /stats/:studentId inline (or move to controller in a separate step, but inline is fine).
-    // 3. Replace /mark-qr inline with controller.markAttendance.
-
     try {
         const studentId = req.params.studentId;
-        const AttendanceSession = require('../models/AttendanceSession');
-        const AttendanceRecord = require('../models/AttendanceRecord');
-        const Subject = require('../models/Subject');
 
-        const subjects = await Subject.find({});
+        const subjects = await Subject.findAll({});
         const subjectStats = [];
         let totalClassesAll = 0;
         let totalAttendedAll = 0;
 
         for (const sub of subjects) {
             // Count total sessions for this subject
-            // We count ALL sessions that are inactive (finished) or active? 
-            // Usually valid sessions.
-            const totalSessions = await AttendanceSession.countDocuments({ subject: sub._id });
+            const totalSessions = await AttendanceSession.count({
+                where: { subjectId: sub.id }
+            });
 
-            const attendedCount = await AttendanceRecord.countDocuments({
-                student: studentId,
-                status: 'present',
-                session: { $in: await AttendanceSession.find({ subject: sub._id }).distinct('_id') }
+            // Get session IDs for this subject
+            const sessions = await AttendanceSession.findAll({
+                where: { subjectId: sub.id },
+                attributes: ['id']
+            });
+            const sessionIds = sessions.map(s => s.id);
+
+            const attendedCount = await AttendanceRecord.count({
+                where: {
+                    studentId: studentId,
+                    status: 'present',
+                    sessionId: { [Op.in]: sessionIds }
+                }
             });
 
             if (totalSessions >= 0) { // even if 0, show it
                 const percentage = totalSessions === 0 ? 0 : Math.round((attendedCount / totalSessions) * 100);
                 subjectStats.push({
-                    subjectId: sub._id,
+                    subjectId: sub.id,
                     name: sub.name,
                     percentage,
                     attended: attendedCount,
@@ -78,12 +82,102 @@ router.get('/stats/:studentId', protect, async (req, res) => {
 router.post('/session/start', protect, controller.startSession);
 
 // Faculty: Get Report (Live Stats)
-router.get('/report/:sessionId', protect, controller.getReport);
+router.get('/session/:sessionId/report', protect, controller.getReport);
 
 // Faculty: Get Subject Stats (Student List)
 router.get('/subject/:subjectId/stats', protect, controller.getSubjectStats);
 
 // Student: Mark Attendance
-router.post('/mark-qr', protect, controller.markAttendance);
+router.post('/mark', protect, controller.markAttendance);
+
+
+
+// Faculty: Get Attendance Grid
+router.get('/subject/:subjectId/grid', protect, controller.getAttendanceGrid);
+
+// Faculty: Get Manual Attendance List
+router.get('/manual-list', protect, controller.getManualList);
+
+// Faculty: Save Manual Session (Bulk)
+router.post('/manual-save', protect, controller.saveManualSession);
+
+// Faculty: Toggle Attendance (Single)
+router.post('/toggle', protect, controller.toggleAttendance);
+
+// Excel Export Routes
+router.get('/export/session/:sessionId', protect, async (req, res) => {
+    try {
+        const { sessionId } = req.params;
+        const records = await AttendanceRecord.findAll({
+            where: { sessionId },
+            include: [
+                { model: AttendanceSession, as: 'session', include: [{ model: Subject, as: 'subject' }] },
+                { model: require('../models/User'), as: 'student' }
+            ]
+        });
+
+        const buffer = exportAttendanceReport(records);
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=attendance_session_${sessionId}.xlsx`);
+        res.send(buffer);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.get('/export/subject/:subjectId/summary', protect, async (req, res) => {
+    try {
+        const { subjectId } = req.params;
+
+        // Get total sessions for this subject
+        const totalSessions = await AttendanceSession.count({ where: { subjectId } });
+
+        // Get All Students
+        const students = await require('../models/User').findAll({
+            where: { role: 'student' },
+            attributes: ['id', 'name', 'email']
+        });
+
+        // Get all sessions for this subject to filter records
+        const sessions = await AttendanceSession.findAll({
+            where: { subjectId },
+            attributes: ['id']
+        });
+        const sessionIds = sessions.map(s => s.id);
+
+        const report = [];
+
+        for (const student of students) {
+            // Count attended sessions
+            const attendedCount = await AttendanceRecord.count({
+                where: {
+                    studentId: student.id,
+                    status: 'present',
+                    sessionId: { [Op.in]: sessionIds }
+                }
+            });
+
+            report.push({
+                id: student.id,
+                name: student.name,
+                rollNumber: student.email, // Using email as roll number for now
+                department: student.department || 'N/A',
+                year: student.year || 'N/A',
+                section: student.section || 'N/A',
+                attended: attendedCount,
+                total: totalSessions,
+                percentage: totalSessions === 0 ? 0 : Math.round((attendedCount / totalSessions) * 100)
+            });
+        }
+
+        const buffer = exportStudentSummaryReport(report);
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=subject_summary_${subjectId}.xlsx`);
+        res.send(buffer);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 module.exports = router;
+

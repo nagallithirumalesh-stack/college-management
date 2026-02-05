@@ -11,17 +11,26 @@ export default function LeaveLetter() {
 
     // Form State
     const [formData, setFormData] = useState({
-        type: 'Leave', // Leave or OD
+        type: 'Leave', // Leave, OD, Permission
         addressee: 'Head of Department', // Default
         startDate: '',
         endDate: '',
         subjectId: '', // Optional: specific subject or null for general
         reason: '',
+        purpose: 'Personal / Family', // Default 
         documentUrl: ''
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [history, setHistory] = useState([]);
+
+    const purposes = [
+        "Medical / Sick",
+        "Personal / Family",
+        "Academic / Event",
+        "On-Duty (External)",
+        "Other"
+    ];
 
     useEffect(() => {
         const fetchSubjects = async () => {
@@ -60,10 +69,6 @@ export default function LeaveLetter() {
                 dates.push(formData.endDate);
             }
 
-            // Prepend Addressee to reason for context if needed, or just send reason.
-            // For now, we'll keep the reason clean as the addressee is often implicit in whom you send to.
-            // But if we want to save it, we could do: `To: ${formData.addressee}\n\n${formData.reason}`
-
             const res = await fetch('http://localhost:5000/api/od', {
                 method: 'POST',
                 headers: {
@@ -72,7 +77,8 @@ export default function LeaveLetter() {
                 },
                 body: JSON.stringify({
                     type: formData.type,
-                    reason: formData.reason, // sending raw reason
+                    purpose: formData.purpose,
+                    reason: formData.reason,
                     dates: dates,
                     targetSubjectId: formData.subjectId || null,
                     documentUrl: formData.documentUrl
@@ -80,7 +86,7 @@ export default function LeaveLetter() {
             });
 
             if (res.ok) {
-                alert('Letter Sent Successfully!');
+                alert('Request Sent Successfully!');
                 setFormData({ ...formData, reason: '', startDate: '', endDate: '' });
                 // Refresh history
                 const histRes = await fetch('http://localhost:5000/api/od/my', {
@@ -93,7 +99,7 @@ export default function LeaveLetter() {
             }
         } catch (error) {
             console.error(error);
-            alert('Failed to send letter');
+            alert('Failed to send request');
         } finally {
             setIsSubmitting(false);
         }
@@ -126,7 +132,7 @@ export default function LeaveLetter() {
                 <div className="space-y-6">
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                         <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
-                            <FileText className="w-5 h-5 mr-2 text-blue-600" /> Compose Letter
+                            <FileText className="w-5 h-5 mr-2 text-blue-600" /> Compose Request
                         </h2>
 
                         <form onSubmit={handleSubmit} className="space-y-4">
@@ -155,8 +161,23 @@ export default function LeaveLetter() {
                                     >
                                         <option value="Leave">Leave of Absence</option>
                                         <option value="OD">On-Duty (OD)</option>
+                                        <option value="Permission">Permission</option>
                                     </select>
                                 </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Purpose / Category</label>
+                                <select
+                                    name="purpose"
+                                    value={formData.purpose}
+                                    onChange={handleChange}
+                                    className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    {purposes.map(p => (
+                                        <option key={p} value={p}>{p}</option>
+                                    ))}
+                                </select>
                             </div>
 
                             <div>
@@ -169,7 +190,7 @@ export default function LeaveLetter() {
                                 >
                                     <option value="">-- Apply to All --</option>
                                     {subjects.map(sub => (
-                                        <option key={sub._id} value={sub._id}>{sub.name}</option>
+                                        <option key={sub.id} value={sub.id}>{sub.name}</option>
                                     ))}
                                 </select>
                             </div>
@@ -206,7 +227,7 @@ export default function LeaveLetter() {
                                     onChange={handleChange}
                                     rows="6"
                                     required
-                                    placeholder="I am writing to request leave because..."
+                                    placeholder="I am writing to request..."
                                     className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                 ></textarea>
                                 <p className="text-xs text-gray-400 mt-1">This text will appear in the formal letter preview.</p>
@@ -233,17 +254,21 @@ export default function LeaveLetter() {
                                 <p className="text-gray-400 text-sm">No past requests.</p>
                             ) : (
                                 history.map(req => (
-                                    <div key={req._id} className="p-3 bg-gray-50 rounded-lg border border-gray-100 flex justify-between items-center group hover:bg-white hover:shadow-xs transition">
+                                    <div key={req.id} className="p-3 bg-gray-50 rounded-lg border border-gray-100 flex justify-between items-center group hover:bg-white hover:shadow-xs transition">
                                         <div>
                                             <div className="flex items-center space-x-2">
-                                                <span className={`px-2 py-0.5 text-xs font-bold rounded ${req.type === 'OD' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700'}`}>
+                                                <span className={`px-2 py-0.5 text-xs font-bold rounded ${req.type === 'OD' ? 'bg-purple-100 text-purple-700' :
+                                                    req.type === 'Permission' ? 'bg-blue-100 text-blue-700' :
+                                                        'bg-orange-100 text-orange-700'
+                                                    }`}>
                                                     {req.type}
                                                 </span>
                                                 <span className="text-sm font-semibold text-gray-900">
-                                                    {new Date(req.dates[0]).toLocaleDateString()}
+                                                    {req.dates && req.dates.length > 0 ? new Date(req.dates[0]).toLocaleDateString() : 'N/A'}
                                                 </span>
                                             </div>
-                                            <p className="text-xs text-gray-500 mt-1 truncate max-w-[200px]">{req.reason}</p>
+                                            <p className="text-xs text-gray-500 mt-1 truncate max-w-[200px] font-medium">{req.purpose || 'General'}</p>
+                                            <p className="text-xs text-gray-400 truncate max-w-[200px]">{req.reason || 'No reason provided'}</p>
                                         </div>
                                         <div className={`flex items-center text-xs font-medium px-2 py-1 rounded-full ${req.status === 'Approved' ? 'bg-green-100 text-green-700' :
                                             req.status === 'Rejected' ? 'bg-red-100 text-red-700' :
@@ -285,16 +310,17 @@ export default function LeaveLetter() {
 
                             <div>
                                 <p className="font-bold underline">
-                                    Subject: Request for {formData.type === 'OD' ? 'On-Duty' : 'Leave'} Permission - Reg.
+                                    Subject: Request for {formData.type === 'OD' ? 'On-Duty' : formData.type === 'Permission' ? 'Permission' : 'Leave'} ({formData.purpose}) - Reg.
                                 </p>
                             </div>
 
                             <div>
                                 <p>Respected Sir/Madam,</p>
                                 <p className="mt-4 indent-8">
-                                    I am writing to formally request {formData.type === 'OD' ? 'On-Duty permission' : 'leave'}
-                                    from <span className="font-semibold">{formatDate(formData.startDate)}</span>
-                                    {formData.endDate ? <span> to <span className="font-semibold">{formatDate(formData.endDate)}</span></span> : ''}.
+                                    I am writing to formally request {formData.type === 'OD' ? 'On-Duty permission' : formData.type === 'Permission' ? 'permission' : 'leave'}
+                                    {formData.purpose ? ` on account of my ${formData.purpose.toLowerCase()}` : ''}
+                                    {formData.type === 'Leave' ? ' from' : ' on'} <span className="font-semibold">{formatDate(formData.startDate)}</span>
+                                    {formData.endDate && formData.endDate !== formData.startDate ? <span> to <span className="font-semibold">{formatDate(formData.endDate)}</span></span> : ''}.
                                 </p>
                                 <p className="mt-2 indent-8">
                                     {formData.reason || <span className="text-gray-300 italic">[Your reason will appear here...]</span>}
@@ -312,7 +338,7 @@ export default function LeaveLetter() {
                         </div>
 
                         <div className="mt-8 pt-4 border-t border-gray-100 text-center">
-                            <p className="text-xs text-gray-400">Generated by SmartCampus Digital System</p>
+                            <p className="text-xs text-gray-400">Generated by EdTrack Digital System</p>
                         </div>
                     </div>
                 </div>

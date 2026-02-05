@@ -1,13 +1,31 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
-const ClassroomSchema = new mongoose.Schema({
-    department: { type: String, required: true },
-    semester: { type: Number, required: true },
-    section: { type: String, default: 'A' },
-    classTeacher: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // The faculty in charge
-}, { timestamps: true });
+const Classroom = sequelize.define('Classroom', {
+    department: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    semester: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+    section: {
+        type: DataTypes.STRING,
+        defaultValue: 'A',
+    },
+}, {
+    timestamps: true,
+    indexes: [
+        {
+            unique: true,
+            fields: ['department', 'semester', 'section']
+        }
+    ]
+});
 
-// Ensure one teacher per class (dept/sem/section tuple)
-ClassroomSchema.index({ department: 1, semester: 1, section: 1 }, { unique: true });
+Classroom.associate = (models) => {
+    Classroom.belongsTo(models.User, { foreignKey: 'classTeacherId', as: 'classTeacher' });
+};
 
-module.exports = mongoose.model('Classroom', ClassroomSchema);
+module.exports = Classroom;
